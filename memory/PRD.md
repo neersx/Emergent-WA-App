@@ -60,7 +60,16 @@ Verify token: DW-WhatsApp-Verify-7f2d9a71-8d6b-4d35-a87c-2c5d90d67b11
 - webhook_events_raw, mq_jobs
 - audit_log, idempotency_keys, rate_limits
 
-## Phase 3 (OUT OF SCOPE - placeholders only)
+## Demo Seed Data (run `/app/backend/seed_demo_data.py`)
+- **3 WABAs**: Demo Business Account (Seed), TechCorp Messaging, RetailBrand Alerts
+- **5 Phone Numbers**: US, UK, India, Brazil + seed number
+- **16 Templates**: 12 APPROVED, 2 PENDING, 1 REJECTED, 1 PAUSED across UTILITY/MARKETING/AUTHENTICATION
+- **576 Messages**: Spread over 60 days (outbound + inbound, various statuses)
+- **15 Conversations**: Mix of open/closed, various window states
+- **266 Usage rollup rows**: Daily cost data by category (marketing/utility/auth) and country (US/GB/IN/BR)
+- **36 Template performance rows**: Per-template monthly stats
+
+ - placeholders only)
 - Advanced analytics (ClickHouse)
 - Proactive alerting (quality-rating drop, failure spikes)
 - Horizontal scaling & read replicas
