@@ -1,0 +1,17 @@
+{
+    "name": "whatsapp-saas-e2e",
+    "version": "1.0.0",
+    "private": true,
+    "description": "End-to-end test suite (Playwright) for the WhatsApp SaaS Phase 1 MVP.",
+    "scripts": {
+        "test": "playwright test",
+        "test:headed": "playwright test --headed",
+        "test:ui": "playwright test --ui",
+        "report": "playwright show-report",
+        "install:browsers": "playwright install --with-deps chromium"
+    },
+    "devDependencies": {
+        "@playwright/test": "^1.49.0",
+        "otplib": "^12.0.1"
+    }
+}
