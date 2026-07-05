@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Local Setup Guide — WhatsApp Business Platform</title>
+<style>
+  :root {
+    --primary:#0d9488; --heading:#0f172a; --bg:#f8fafc; --card:#fff;
+    --border:#e2e8f0; --text:#1e293b; --muted:#64748b; --code-bg:#0f172a;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); line-height:1.7; }
+  .layout { display:flex; min-height:100vh; }
+  .sidebar { width:260px; background:var(--heading); color:#e2e8f0; position:fixed; top:0; left:0; height:100vh; overflow-y:auto; padding:1.5rem 1rem; font-size:0.875rem; }
+  .sidebar h2 { color:var(--primary); font-size:0.85rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; margin-bottom:1rem; padding-bottom:.5rem; border-bottom:1px solid rgba(255,255,255,.1); }
+  .sidebar a { display:block; padding:.3rem .5rem; color:#94a3b8; text-decoration:none; border-radius:4px; }
+  .sidebar a:hover { color:#fff; background:rgba(255,255,255,.08); }
+  .sidebar .grp { color:#475569; font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; padding:.6rem .5rem .2rem; }
+  .main { margin-left:260px; padding:2rem 2.5rem; max-width:960px; }
+  .hero { background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%); color:white; padding:2.5rem; margin:-2rem -2.5rem 2.5rem; border-radius:0 0 12px 12px; }
+  .hero .tag { display:inline-block; background:var(--primary); color:#fff; font-size:.7rem; font-weight:700; padding:.2rem .6rem; border-radius:10px; margin-bottom:.75rem; }
+  .hero h1 { font-size:1.75rem; font-weight:800; margin-bottom:.5rem; }
+  .hero p { color:#94a3b8; }
+  section { margin-bottom:2.5rem; }
+  h2 { font-size:1.25rem; font-weight:700; color:var(--heading); padding-bottom:.6rem; border-bottom:2px solid var(--border); margin-bottom:1.25rem; display:flex; align-items:center; gap:.5rem; }
+  .num { background:var(--primary); color:#fff; width:1.6rem; height:1.6rem; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:700; flex-shrink:0; }
+  h3 { font-size:.95rem; font-weight:600; color:var(--heading); margin:1.25rem 0 .6rem; }
+  p { margin-bottom:.75rem; font-size:.9rem; }
+  pre { background:var(--code-bg); color:#e2e8f0; padding:1.1rem 1.25rem; border-radius:8px; overflow-x:auto; font-family:'JetBrains Mono','Fira Code',monospace; font-size:.82rem; line-height:1.6; margin:.5rem 0 1rem; position:relative; }
+  code { background:#f1f5f9; color:#0f172a; padding:.1rem .35rem; border-radius:3px; font-family:'JetBrains Mono',monospace; font-size:.82em; }
+  pre code { background:none; color:inherit; padding:0; }
+  .copy-btn { position:absolute; top:.5rem; right:.5rem; background:rgba(255,255,255,.1); color:#94a3b8; border:1px solid rgba(255,255,255,.15); border-radius:4px; padding:.2rem .5rem; font-size:.7rem; cursor:pointer; transition:all .15s; }
+  .copy-btn:hover { background:rgba(255,255,255,.2); color:#fff; }
+  .copy-btn.copied { background:#0d9488; color:#fff; }
+  .table-wrap { border-radius:8px; overflow:hidden; border:1px solid var(--border); margin:1rem 0; }
+  table { width:100%; border-collapse:collapse; font-size:.875rem; }
+  th { background:var(--heading); color:#fff; padding:.55rem 1rem; text-align:left; font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; }
+  td { padding:.55rem 1rem; border-bottom:1px solid var(--border); vertical-align:top; }
+  tr:hover td { background:#f8fafc; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:1.1rem 1.25rem; margin:.75rem 0; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  .step { display:flex; gap:.75rem; margin-bottom:.75rem; }
+  .step-n { background:var(--primary); color:#fff; width:1.4rem; height:1.4rem; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.7rem; font-weight:700; flex-shrink:0; margin-top:.1rem; }
+  .callout { border-left:4px solid var(--primary); background:#f0fdfa; padding:.75rem 1rem; border-radius:0 6px 6px 0; margin:.75rem 0; font-size:.875rem; }
+  .callout.warn { border-color:#f59e0b; background:#fffbeb; }
+  .callout.err  { border-color:#ef4444; background:#fff1f2; }
+  .badge-green { background:#dcfce7; color:#15803d; padding:.1rem .5rem; border-radius:10px; font-size:.72rem; font-weight:600; }
+  .badge-amber { background:#fef3c7; color:#92400e; padding:.1rem .5rem; border-radius:10px; font-size:.72rem; font-weight:600; }
+  .badge-red   { background:#fee2e2; color:#b91c1c; padding:.1rem .5rem; border-radius:10px; font-size:.72rem; font-weight:600; }
+  .qr { background:#fff; border:2px solid var(--border); border-radius:10px; padding:1.25rem; text-align:center; margin-bottom:.75rem; }
+  .cmd-box { background:var(--code-bg); color:#4ade80; padding:.75rem 1rem; border-radius:6px; font-family:monospace; font-size:.85rem; margin:.5rem 0; }
+  @media (max-width:800px) { .sidebar { display:none; } .main { margin-left:0; } .grid2 { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar">
+  <h2>Local Setup</h2>
+  <div class="grp">Getting Started</div>
+  <a href="#req">1. System Requirements</a>
+  <a href="#prereq">2. Install Prerequisites</a>
+  <a href="#clone">3. Clone Repository</a>
+  <div class="grp">Configuration</div>
+  <a href="#mongo">4. MongoDB Setup</a>
+  <a href="#backend">5. Backend Setup</a>
+  <a href="#frontend">6. Frontend Setup</a>
+  <a href="#env">7. Environment Variables</a>
+  <div class="grp">Running</div>
+  <a href="#run">8. Run the App</a>
+  <a href="#verify">9. Verify</a>
+  <a href="#meta">10. Live Mode (Meta)</a>
+  <a href="#ws">11. WebSocket Test</a>
+  <a href="#seed">12. Seed Demo Data</a>
+  <div class="grp">Reference</div>
+  <a href="#commands">13. Useful Commands</a>
+  <a href="#trouble">14. Troubleshooting</a>
+</nav>
+
+<main class="main">
+<div class="hero">
+  <div class="tag">LOCAL DEVELOPMENT GUIDE</div>
+  <h1>WhatsApp Business Platform</h1>
+  <p>Complete setup for macOS: FastAPI · React · MongoDB · WebSocket · Meta API</p>
+</div>
+
+<!-- 1. Requirements -->
+<section id="req">
+<h2><span class="num">1</span> System Requirements</h2>
+<div class="table-wrap"><table>
+<tr><th>Tool</th><th>Minimum</th><th>Recommended</th></tr>
+<tr><td>macOS</td><td>Monterey 12.0</td><td>Sonoma 14.0+</td></tr>
+<tr><td>RAM</td><td>8 GB</td><td>16 GB</td></tr>
+<tr><td>Python</td><td>3.11</td><td>3.11+</td></tr>
+<tr><td>Node.js</td><td>18.x</td><td>20.x LTS</td></tr>
+<tr><td>Yarn</td><td>1.22</td><td>1.22+</td></tr>
+<tr><td>MongoDB</td><td>6.0</td><td>7.0</td></tr>
+</table></div>
+</section>
+
+<!-- 2. Prerequisites -->
+<section id="prereq">
+<h2><span class="num">2</span> Install Prerequisites</h2>
+
+<h3>2.1 — Homebrew</h3>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</pre>
+<p>Apple Silicon — add to PATH:</p>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile && source ~/.zprofile</pre>
+
+<h3>2.2 — Python 3.11</h3>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>brew install python@3.11
+echo 'export PATH="/opt/homebrew/opt/python@3.11/bin:$PATH"' >> ~/.zprofile && source ~/.zprofile</pre>
+
+<h3>2.3 — Node.js 20 LTS</h3>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>brew install node@20
+echo 'export PATH="/opt/homebrew/opt/node@20/bin:$PATH"' >> ~/.zprofile && source ~/.zprofile</pre>
+
+<h3>2.4 — Yarn</h3>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>npm install -g yarn</pre>
+
+<h3>2.5 — MongoDB 7.0</h3>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>brew tap mongodb/brew
+brew install mongodb-community@7.0
+brew services start mongodb-community@7.0</pre>
+<p>Verify: <code>mongosh --eval "db.runCommand({connectionStatus:1})" --quiet</code> → should print <code>{ ok: 1 }</code></p>
+<div class="callout warn"><strong>Alternative — Docker:</strong> <code>docker run -d --name mongodb -p 27017:27017 mongo:7.0</code></div>
+</section>
+
+<!-- 3. Clone -->
+<section id="clone">
+<h2><span class="num">3</span> Clone the Repository</h2>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>git clone https://github.com/neersx/Emergent-WA-App.git
+cd Emergent-WA-App</pre>
+</section>
+
+<!-- 4. MongoDB -->
+<section id="mongo">
+<h2><span class="num">4</span> MongoDB Setup</h2>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button># Verify MongoDB is running
+brew services list | grep mongodb
+# Expected: mongodb-community  started</pre>
+<p>The app creates the <code>whatsapp_saas</code> database automatically on first run.</p>
+</section>
+
+<!-- 5. Backend -->
+<section id="backend">
+<h2><span class="num">5</span> Backend Setup</h2>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>cd backend
+
+# Create virtual environment
+python3.11 -m venv venv
+
+# Activate it
+source venv/bin/activate   # (venv) should appear in your prompt
+
+# Install dependencies
+pip install --upgrade pip
+pip install -r requirements.txt</pre>
+<div class="callout">Install time: ~2–3 minutes</div>
+</section>
+
+<!-- 6. Frontend -->
+<section id="frontend">
+<h2><span class="num">6</span> Frontend Setup</h2>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>cd frontend
+yarn install</pre>
+<div class="callout">Install time: ~1–2 minutes. Peer dependency warnings are harmless.</div>
+</section>
+
+<!-- 7. Env vars -->
+<section id="env">
+<h2><span class="num">7</span> Environment Variables</h2>
+<p>Run the automated setup script (generates secure cryptographic keys):</p>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>chmod +x scripts/setup-env.sh
+./scripts/setup-env.sh</pre>
+<p>Or create them manually:</p>
+
+<h3>backend/.env</h3>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>MONGO_URL=mongodb://localhost:27017
+DB_NAME=whatsapp_saas
+CORS_ORIGINS=http://localhost:3000
+JWT_SIGNING_KEY=&lt;run: python3 -c "import secrets; print(secrets.token_hex(32))"&gt;
+TOKEN_ENCRYPTION_KEY=&lt;run: python3 -c "import base64,secrets; print(base64.urlsafe_b64encode(secrets.token_bytes(32)).decode())"&gt;
+META_APP_ID=
+META_APP_SECRET=
+META_EMBEDDED_SIGNUP_CONFIG_ID=
+META_WEBHOOK_VERIFY_TOKEN=local-dev-token
+META_GRAPH_API_VERSION=v21.0
+META_MOCK_MODE=true
+MEDIA_STORAGE_MODE=disk
+MEDIA_STORAGE_PATH=./media
+WORKER_ENABLED=true
+WORKER_POLL_INTERVAL_MS=500</pre>
+
+<h3>frontend/.env</h3>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>REACT_APP_BACKEND_URL=http://localhost:8001</pre>
+<div class="callout warn">Never commit <code>.env</code> to Git — it's already in <code>.gitignore</code></div>
+</section>
+
+<!-- 8. Run -->
+<section id="run">
+<h2><span class="num">8</span> Run the Application</h2>
+
+<h3>Option A — One Command (Recommended)</h3>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>chmod +x scripts/start.sh
+./scripts/start.sh</pre>
+<p>Starts MongoDB + Backend + Frontend, tails all logs in one terminal. Press <code>Ctrl+C</code> to stop everything.</p>
+
+<h3>Option B — Make</h3>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>make install   # first time only
+make dev       # start all services (background)
+make logs      # view output
+make stop      # stop all</pre>
+
+<h3>Option C — 3 Separate Terminals</h3>
+<div class="grid2">
+<div>
+<p><strong>Terminal 1 — Backend</strong></p>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>cd backend
+source venv/bin/activate
+uvicorn server:app \
+  --host 0.0.0.0 \
+  --port 8001 \
+  --reload</pre>
+</div>
+<div>
+<p><strong>Terminal 2 — Frontend</strong></p>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>cd frontend
+yarn start</pre>
+</div>
+</div>
+</section>
+
+<!-- 9. Verify -->
+<section id="verify">
+<h2><span class="num">9</span> Verify Everything Works</h2>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button># Backend health check
+curl http://localhost:8001/api/health
+
+# Test login
+curl -X POST http://localhost:8001/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"owner@demo.com","password":"Owner123!"}' \
+  -c /tmp/cookies.txt | python3 -m json.tool
+
+# Open in browser
+open http://localhost:3000</pre>
+
+<div class="table-wrap"><table>
+<tr><th>Service</th><th>URL</th><th>Status</th></tr>
+<tr><td>Frontend</td><td>http://localhost:3000</td><td><span class="badge-green">React SPA</span></td></tr>
+<tr><td>Backend API</td><td>http://localhost:8001</td><td><span class="badge-green">FastAPI</span></td></tr>
+<tr><td>API Docs</td><td>http://localhost:8001/docs</td><td><span class="badge-green">Swagger UI</span></td></tr>
+<tr><td>WebSocket</td><td>ws://localhost:8001/api/ws/inbox</td><td><span class="badge-green">Real-time</span></td></tr>
+<tr><td>MongoDB</td><td>mongodb://localhost:27017</td><td><span class="badge-green">Database</span></td></tr>
+</table></div>
+
+<h3>Demo Accounts</h3>
+<div class="table-wrap"><table>
+<tr><th>Role</th><th>Email</th><th>Password</th><th>Notes</th></tr>
+<tr><td>Tenant Owner</td><td>owner@demo.com</td><td>Owner123!</td><td>Full access to Demo Inc tenant</td></tr>
+<tr><td>Super Admin</td><td>super@admin.com</td><td>SuperAdmin123!</td><td>MFA required — TOTP on first login</td></tr>
+</table></div>
+</section>
+
+<!-- 10. Live Mode -->
+<section id="meta">
+<h2><span class="num">10</span> Meta API — Live Mode</h2>
+<div class="callout">Mock mode (<code>META_MOCK_MODE=true</code>) works fully without Meta credentials. Skip this section until you're ready to go live.</div>
+
+<h3>Step 1 — Get credentials from Meta</h3>
+<p>Go to <a href="https://developers.facebook.com/apps" target="_blank">developers.facebook.com/apps</a> and find:</p>
+<div class="table-wrap"><table>
+<tr><th>Variable</th><th>Location in Meta Dashboard</th></tr>
+<tr><td>META_APP_ID</td><td>Settings → Basic → App ID</td></tr>
+<tr><td>META_APP_SECRET</td><td>Settings → Basic → App Secret</td></tr>
+<tr><td>META_EMBEDDED_SIGNUP_CONFIG_ID</td><td>WhatsApp → Embedded Signup → Config ID</td></tr>
+<tr><td>META_WEBHOOK_VERIFY_TOKEN</td><td>Your own chosen secret string</td></tr>
+</table></div>
+
+<h3>Step 2 — Expose localhost with ngrok</h3>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>brew install ngrok/ngrok/ngrok
+ngrok http 8001
+# Copy the https://xxxxx.ngrok.io URL</pre>
+
+<h3>Step 3 — Set webhook in Meta Dashboard</h3>
+<p>Callback URL: <code>https://xxxxx.ngrok.io/api/webhooks/meta</code><br>
+Verify Token: (same as your <code>META_WEBHOOK_VERIFY_TOKEN</code>)</p>
+
+<h3>Step 4 — Update backend/.env</h3>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>META_APP_ID=your_app_id
+META_APP_SECRET=your_app_secret
+META_EMBEDDED_SIGNUP_CONFIG_ID=your_config_id
+META_WEBHOOK_VERIFY_TOKEN=your_verify_token
+META_MOCK_MODE=false</pre>
+<p>Restart the backend after changing <code>.env</code>.</p>
+</section>
+
+<!-- 11. WebSocket -->
+<section id="ws">
+<h2><span class="num">11</span> WebSocket Verification</h2>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button># Install wscat
+npm install -g wscat
+
+# After logging in via browser, test WebSocket:
+wscat -c "ws://localhost:8001/api/ws/inbox"</pre>
+<p>The server sends <code>{"type":"auth_required"}</code> — the browser sends the cookie automatically. In the browser DevTools → Network → WS tab, you should see the connection and live events when you simulate an inbound message.</p>
+</section>
+
+<!-- 12. Seed -->
+<section id="seed">
+<h2><span class="num">12</span> Seed Demo Data</h2>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>cd backend
+source venv/bin/activate
+python seed_demo_data.py</pre>
+<p>Creates: 3 WABAs · 5 phone numbers · 16 templates · 576 messages · 15 conversations · 266 usage rollup rows</p>
+</section>
+
+<!-- 13. Commands -->
+<section id="commands">
+<h2><span class="num">13</span> Useful Commands</h2>
+<div class="grid2">
+<div>
+<h3>Backend</h3>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button># Start
+cd backend && source venv/bin/activate
+uvicorn server:app --port 8001 --reload
+
+# API Docs
+open http://localhost:8001/docs
+
+# Run tests
+python -m pytest tests/ -v</pre>
+</div>
+<div>
+<h3>Frontend</h3>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button># Start
+cd frontend && yarn start
+
+# Build
+yarn build
+
+# Tests
+yarn test</pre>
+</div>
+<div>
+<h3>MongoDB Shell</h3>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>mongosh whatsapp_saas
+
+db.messages.countDocuments()
+db.users.find({},{email:1,role:1})
+db.templates.find({status:"APPROVED"})
+db.dropDatabase()  # full reset</pre>
+</div>
+<div>
+<h3>Make Commands</h3>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>make install   # install all deps
+make dev       # start background
+make stop      # stop all
+make logs      # tail logs
+make seed      # seed demo data
+make health    # health check
+make reset-db  # drop database</pre>
+</div>
+</div>
+</section>
+
+<!-- 14. Troubleshooting -->
+<section id="trouble">
+<h2><span class="num">14</span> Troubleshooting</h2>
+
+<div class="callout err"><strong>❌ MongoDB: ServerSelectionTimeoutError localhost:27017</strong><br>
+<code>brew services start mongodb-community@7.0</code></div>
+
+<div class="callout err"><strong>❌ error: legacy-install-failure (bcrypt / cryptography)</strong><br>
+<code>xcode-select --install</code> → then retry <code>pip install -r requirements.txt</code></div>
+
+<div class="callout err"><strong>❌ Port 3000 already in use</strong><br>
+<code>kill -9 $(lsof -ti:3000)</code></div>
+
+<div class="callout err"><strong>❌ Port 8001 already in use</strong><br>
+<code>kill -9 $(lsof -ti:8001)</code></div>
+
+<div class="callout err"><strong>❌ TOKEN_ENCRYPTION_KEY not a valid Fernet key</strong><br>
+<code>python3 -c "import base64,secrets; print(base64.urlsafe_b64encode(secrets.token_bytes(32)).decode())"</code></div>
+
+<div class="callout err"><strong>❌ CORS error in browser</strong><br>
+Set <code>CORS_ORIGINS=http://localhost:3000</code> in <code>backend/.env</code> and restart backend.</div>
+
+<div class="callout err"><strong>❌ Apple Silicon: yarn install fails (native modules)</strong><br>
+<code>rm -rf node_modules && arch -arm64 yarn install</code></div>
+
+<div class="callout err"><strong>❌ Template sync fails with 401</strong><br>
+Expected — the seeded demo WABAs have a fake token. Only real WABAs from Embedded Signup will sync.</div>
+
+</section>
+
+<div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--border);text-align:center;color:var(--muted);font-size:.8rem">
+  WhatsApp Business Platform · Local Setup Guide · July 2026
+</div>
+
+</main>
+</div>
+
+<script>
+function copyCode(btn) {
+  const code = btn.parentElement.textContent.replace('Copy','').trim();
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = '✓ Copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
