@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MongoDB Guide — WhatsApp Business Platform</title>
+<style>
+  :root{--primary:#00684a;--primary-light:#00A35C;--bg:#0c0f12;--bg2:#12161c;--bg3:#1a2030;
+    --border:#1e2d3d;--text:#c8d3e0;--heading:#e8f0fe;--muted:#7a8ba0;--green:#00A35C;
+    --blue:#0ea5e9;--amber:#f59e0b;--red:#ef4444;--purple:#a855f7;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  
+  /* Sidebar */
+  .sidebar{width:270px;background:var(--bg2);border-right:1px solid var(--border);position:fixed;top:0;left:0;
+    height:100vh;overflow-y:auto;padding:1.25rem .75rem;font-size:.8rem;}
+  .sidebar-logo{display:flex;align-items:center;gap:.6rem;margin-bottom:1.5rem;padding-bottom:1rem;
+    border-bottom:1px solid var(--border);}
+  .sidebar-logo .icon{width:2rem;height:2rem;background:var(--green);border-radius:6px;display:flex;
+    align-items:center;justify-content:center;font-size:1rem;}
+  .sidebar-logo .name{font-weight:700;color:var(--heading);font-size:.9rem;line-height:1.2;}
+  .sidebar-logo .sub{color:var(--muted);font-size:.7rem;}
+  .nav-group{color:var(--muted);font-size:.68rem;font-weight:700;text-transform:uppercase;
+    letter-spacing:.08em;padding:.6rem .5rem .25rem;}
+  .sidebar a{display:block;padding:.3rem .6rem;color:#8899aa;text-decoration:none;border-radius:5px;
+    transition:all .12s;}
+  .sidebar a:hover{color:#e2e8f0;background:rgba(255,255,255,.05);}
+
+  /* Main */
+  .main{margin-left:270px;padding:2rem 2.5rem;max-width:980px;}
+  
+  /* Hero */
+  .hero{background:linear-gradient(135deg,#001a12 0%,#003320 50%,#001a12 100%);
+    border:1px solid #00684a44;border-radius:12px;padding:2.5rem;margin-bottom:2.5rem;position:relative;overflow:hidden;}
+  .hero::before{content:'';position:absolute;top:-50px;right:-50px;width:200px;height:200px;
+    background:radial-gradient(circle,#00A35C22 0%,transparent 70%);}
+  .hero .tag{display:inline-block;background:#00684a;color:#90FFD0;font-size:.7rem;font-weight:700;
+    padding:.2rem .7rem;border-radius:10px;letter-spacing:.05em;text-transform:uppercase;margin-bottom:1rem;}
+  .hero h1{font-size:1.9rem;font-weight:800;color:var(--heading);margin-bottom:.5rem;}
+  .hero p{color:var(--muted);font-size:.95rem;}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-top:1.5rem;}
+  .stat{background:rgba(0,104,74,.15);border:1px solid #00684a33;border-radius:8px;padding:.75rem;text-align:center;}
+  .stat .val{font-size:1.4rem;font-weight:700;color:var(--green);}
+  .stat .lbl{font-size:.7rem;color:var(--muted);margin-top:.15rem;}
+
+  /* Section */
+  section{margin-bottom:2.5rem;}
+  h2{font-size:1.2rem;font-weight:700;color:var(--heading);padding-bottom:.6rem;
+    border-bottom:1px solid var(--border);margin-bottom:1.25rem;display:flex;align-items:center;gap:.5rem;}
+  .num{background:var(--green);color:#fff;width:1.6rem;height:1.6rem;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;}
+  h3{font-size:.95rem;font-weight:600;color:#b0c0d0;margin:1.25rem 0 .6rem;}
+  p{margin-bottom:.75rem;font-size:.9rem;color:var(--text);}
+
+  /* Code blocks */
+  .code-wrap{position:relative;margin:.5rem 0 1.25rem;}
+  .code-label{position:absolute;top:.5rem;left:1rem;font-size:.65rem;font-weight:700;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.08em;z-index:1;}
+  pre{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:1.1rem 1.25rem;
+    padding-top:1.75rem;overflow-x:auto;font-family:'JetBrains Mono','Fira Code',Consolas,monospace;
+    font-size:.8rem;line-height:1.65;color:#c9d1d9;}
+  .copy-btn{position:absolute;top:.4rem;right:.6rem;background:#1e2d3d;color:var(--muted);
+    border:1px solid var(--border);border-radius:4px;padding:.2rem .55rem;font-size:.65rem;
+    cursor:pointer;transition:all .15s;z-index:1;}
+  .copy-btn:hover{background:#2a3d50;color:#e2e8f0;}
+  .copy-btn.ok{background:#00684a;color:#90FFD0;border-color:#00A35C;}
+
+  /* Syntax colours */
+  .kw{color:#ff79c6;}   /* keywords: use, find, aggregate */
+  .fn{color:#8be9fd;}   /* functions/methods */
+  .str{color:#f1fa8c;}  /* strings */
+  .num-c{color:#bd93f9;} /* numbers */
+  .cmt{color:#6272a4;}  /* comments */
+  .op{color:#ff79c6;}   /* operators */
+  .field{color:#50fa7b;} /* field names */
+  .val{color:#ffb86c;}  /* values */
+
+  /* Tables */
+  .tbl-wrap{border-radius:8px;overflow:hidden;border:1px solid var(--border);margin:1rem 0 1.5rem;}
+  table{width:100%;border-collapse:collapse;font-size:.82rem;}
+  th{background:var(--bg3);color:var(--heading);padding:.55rem 1rem;text-align:left;
+    font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;}
+  td{padding:.5rem 1rem;border-bottom:1px solid var(--border);vertical-align:top;color:var(--text);}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td code,th code{background:#1e2d3d;padding:.1rem .3rem;border-radius:3px;font-size:.78em;
+    font-family:'JetBrains Mono',monospace;color:#8be9fd;}
+
+  /* Callouts */
+  .callout{border-left:3px solid var(--green);background:#001a12;padding:.75rem 1rem;
+    border-radius:0 6px 6px 0;margin:.75rem 0 1rem;font-size:.85rem;}
+  .callout.warn{border-color:var(--amber);background:#1a1200;}
+  .callout.err{border-color:var(--red);background:#1a0000;}
+  .callout strong{color:var(--heading);display:block;margin-bottom:.25rem;}
+
+  /* Badges */
+  .badge{padding:.15rem .5rem;border-radius:10px;font-size:.7rem;font-weight:600;}
+  .badge-green{background:#003320;color:#90FFD0;}
+  .badge-blue{background:#0c2a3d;color:#7dd3fc;}
+  .badge-amber{background:#2a1a00;color:#fcd34d;}
+  .badge-red{background:#2a0000;color:#fca5a5;}
+  .badge-purple{background:#1a0a2a;color:#d8b4fe;}
+
+  /* Collection cards */
+  .coll-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;
+    padding:1.1rem 1.25rem;margin-bottom:1.25rem;}
+  .coll-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;}
+  .coll-name{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:700;color:var(--green);}
+  .coll-count{font-size:.75rem;color:var(--muted);}
+
+  /* Index table */
+  .idx-row{display:grid;grid-template-columns:200px 280px 80px 1fr;gap:.75rem;
+    padding:.4rem .75rem;border-radius:4px;font-size:.78rem;align-items:start;}
+  .idx-row:hover{background:rgba(255,255,255,.02);}
+  .idx-row.header{color:var(--muted);font-size:.7rem;font-weight:600;text-transform:uppercase;
+    letter-spacing:.05em;border-bottom:1px solid var(--border);padding-bottom:.5rem;margin-bottom:.25rem;}
+  .idx-coll{color:#8be9fd;font-family:monospace;}
+  .idx-key{color:#f1fa8c;font-family:monospace;}
+  .idx-type span{display:inline-block;}
+  .idx-why{color:var(--muted);}
+
+  /* Flow diagram */
+  .flow{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:1.25rem;margin:1rem 0;}
+  .flow-title{font-size:.8rem;font-weight:600;color:var(--muted);text-transform:uppercase;
+    letter-spacing:.05em;margin-bottom:1rem;}
+  .flow-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;font-size:.82rem;}
+  .flow-box{background:var(--bg3);border:1px solid var(--border);border-radius:5px;
+    padding:.3rem .7rem;font-family:monospace;font-size:.78rem;color:#8be9fd;white-space:nowrap;}
+  .flow-arrow{color:var(--muted);font-size:.9rem;}
+  .flow-label{color:var(--muted);font-size:.75rem;font-style:italic;}
+
+  /* Grid */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+  @media(max-width:800px){.sidebar{display:none;}.main{margin-left:0;}.grid2,.stats{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- Sidebar -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="icon">🍃</div>
+    <div><div class="name">MongoDB Guide</div><div class="sub">WABA Platform</div></div>
+  </div>
+  <div class="nav-group">Getting Started</div>
+  <a href="#why">1. Why MongoDB?</a>
+  <a href="#install">2. Install on macOS</a>
+  <a href="#manage">3. Start / Stop / Manage</a>
+  <a href="#concepts">4. Core Concepts</a>
+  <a href="#shell">5. mongosh Basics</a>
+  <div class="nav-group">Database Design</div>
+  <a href="#overview">6. Database Overview</a>
+  <a href="#collections">7. All 17 Collections</a>
+  <a href="#indexes">8. Indexes</a>
+  <div class="nav-group">Application Usage</div>
+  <a href="#connect">9. Motor Driver</a>
+  <a href="#patterns">10. Query Patterns</a>
+  <a href="#aggregation">11. Aggregation</a>
+  <a href="#queue">12. Job Queue</a>
+  <a href="#ttl">13. TTL Indexes</a>
+  <div class="nav-group">Operations</div>
+  <a href="#maintenance">14. Maintenance</a>
+  <a href="#backup">15. Backup & Restore</a>
+  <a href="#perf">16. Performance</a>
+  <a href="#errors">17. Common Errors</a>
+</nav>
+
+<main class="main">
+
+<!-- Hero -->
+<div class="hero">
+  <div class="tag">MongoDB Guide</div>
+  <h1>Database Setup & Application Guide</h1>
+  <p>Install MongoDB locally, understand every collection in the WhatsApp Business Platform, run queries, and operate the database with confidence.</p>
+  <div class="stats">
+    <div class="stat"><div class="val">17</div><div class="lbl">Collections</div></div>
+    <div class="stat"><div class="val">~1000</div><div class="lbl">Demo docs</div></div>
+    <div class="stat"><div class="val">28</div><div class="lbl">Indexes</div></div>
+    <div class="stat"><div class="val">3</div><div class="lbl">TTL auto-expire</div></div>
+  </div>
+</div>
+
+<!-- 1. Why MongoDB -->
+<section id="why">
+<h2><span class="num">1</span> Why MongoDB?</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Feature</th><th>Why it matters in this application</th></tr>
+<tr><td>Flexible schema</td><td>Inbound messages can be text, image, video, location, reaction — each needs different fields. MongoDB stores each as a document without unused null columns.</td></tr>
+<tr><td>Native JSON docs</td><td>Meta webhook payloads arrive as JSON and are stored as-is, preserving nested structure perfectly.</td></tr>
+<tr><td>Atomic <code>find_one_and_update</code></td><td>The job queue claims exactly one job without race conditions — no <code>SELECT FOR UPDATE</code> or distributed locking needed.</td></tr>
+<tr><td>TTL indexes</td><td>Refresh tokens and idempotency keys expire automatically — zero cleanup code required.</td></tr>
+<tr><td>Aggregation pipeline</td><td>Analytics queries (timeseries, cost rollup, template performance) use <code>$group</code>, <code>$match</code>, <code>$addFields</code> — no separate analytics DB.</td></tr>
+<tr><td>Upsert + <code>$setOnInsert</code></td><td>WABA onboarding, conversation tracking, and cost rollup are fully idempotent using upsert — safe to call multiple times.</td></tr>
+<tr><td>Motor async driver</td><td>FastAPI is fully async; Motor provides native <code>async/await</code> MongoDB I/O with zero thread-pool overhead.</td></tr>
+</table></div>
+</section>
+
+<!-- 2. Install -->
+<section id="install">
+<h2><span class="num">2</span> Install MongoDB on macOS</h2>
+<h3>Using Homebrew (Recommended)</h3>
+<div class="code-wrap"><div class="code-label">bash</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="cmt"># Step 1 — Add the MongoDB tap</span>
+<span class="fn">brew</span> tap mongodb/brew
+
+<span class="cmt"># Step 2 — Install MongoDB Community 7.0</span>
+<span class="fn">brew</span> install mongodb-community@7.0
+
+<span class="cmt"># Step 3 — Verify</span>
+<span class="fn">mongod</span> --version
+<span class="cmt"># db version v7.0.x</span>
+
+<span class="fn">mongosh</span> --version
+<span class="cmt"># 2.x.x</span></pre></div>
+
+<h3>Default paths after install</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Item</th><th>Apple Silicon (M1/M2/M3)</th><th>Intel Mac</th></tr>
+<tr><td>Data directory</td><td><code>/opt/homebrew/var/mongodb</code></td><td><code>/usr/local/var/mongodb</code></td></tr>
+<tr><td>Log file</td><td><code>/opt/homebrew/var/log/mongodb/mongo.log</code></td><td><code>/usr/local/var/log/mongodb/mongo.log</code></td></tr>
+<tr><td>Config file</td><td><code>/opt/homebrew/etc/mongod.conf</code></td><td><code>/usr/local/etc/mongod.conf</code></td></tr>
+</table></div>
+
+<h3>Alternative — Docker</h3>
+<div class="code-wrap"><div class="code-label">bash</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre>docker run -d \
+  --name mongodb \
+  -p 27017:27017 \
+  -v mongodb_data:/data/db \
+  mongo:7.0</pre></div>
+</section>
+
+<!-- 3. Manage -->
+<section id="manage">
+<h2><span class="num">3</span> Start, Stop & Manage MongoDB</h2>
+<div class="grid2">
+<div>
+<h3>As a macOS Service</h3>
+<div class="code-wrap"><div class="code-label">bash</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="cmt"># Start (auto-starts on login)</span>
+brew services start mongodb-community@7.0
+
+<span class="cmt"># Stop</span>
+brew services stop mongodb-community@7.0
+
+<span class="cmt"># Restart</span>
+brew services restart mongodb-community@7.0
+
+<span class="cmt"># Check status</span>
+brew services list | grep mongodb</pre></div>
+</div>
+<div>
+<h3>Verify Connection</h3>
+<div class="code-wrap"><div class="code-label">bash</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="cmt"># Quick test</span>
+mongosh --eval \
+  "db.runCommand({connectionStatus:1})" \
+  --quiet
+<span class="cmt"># Expected: { ok: 1 }</span>
+
+<span class="cmt"># Open interactive shell</span>
+mongosh</pre></div>
+</div>
+</div>
+</section>
+
+<!-- 4. Concepts -->
+<section id="concepts">
+<h2><span class="num">4</span> MongoDB Core Concepts</h2>
+<div class="flow">
+<div class="flow-title">Hierarchy</div>
+<div class="flow-row"><div class="flow-box">MongoDB Server (mongod)</div></div>
+<div class="flow-row" style="padding-left:1.5rem"><div class="flow-arrow">└──</div><div class="flow-box">Database: "whatsapp_saas"</div></div>
+<div class="flow-row" style="padding-left:3.5rem"><div class="flow-arrow">└──</div><div class="flow-box">Collection: "messages"</div><div class="flow-label">← like a SQL table</div></div>
+<div class="flow-row" style="padding-left:5.5rem"><div class="flow-arrow">└──</div><div class="flow-box">Document: { "_id": "...", "body": "..." }</div><div class="flow-label">← like a SQL row</div></div>
+<div class="flow-row" style="padding-left:7.5rem"><div class="flow-arrow">└──</div><div class="flow-box">Field: "body": "Hello world"</div><div class="flow-label">← like a SQL column</div></div>
+</div>
+
+<h3>Key Differences vs SQL</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Concept</th><th>SQL</th><th>MongoDB</th></tr>
+<tr><td>Table</td><td><code>CREATE TABLE users (...)</code></td><td>Collection <code>db.users</code></td></tr>
+<tr><td>Row</td><td>Fixed columns, nullable</td><td>Flexible JSON document</td></tr>
+<tr><td>Primary key</td><td><code>id SERIAL PRIMARY KEY</code></td><td><code>_id</code> field</td></tr>
+<tr><td>Foreign key</td><td><code>REFERENCES tenants(id)</code></td><td>Field by convention (e.g. <code>tenant_id</code>)</td></tr>
+<tr><td>Schema</td><td>Enforced by DDL</td><td>Optional (by application)</td></tr>
+<tr><td>Auto-expire rows</td><td>pg_cron / scheduled jobs</td><td><span class="badge badge-green">TTL Index</span> — zero code needed</td></tr>
+<tr><td>Aggregation</td><td><code>GROUP BY</code>, <code>SUM()</code></td><td><code>$group</code>, <code>$sum</code> in pipeline</td></tr>
+</table></div>
+
+<div class="callout"><strong>This app's _id convention:</strong> Uses UUID strings instead of MongoDB's default ObjectId. This makes IDs URL-safe and portable. The <code>_id</code> and <code>id</code> fields always hold the same UUID value — <code>_id</code> is MongoDB's primary key, <code>id</code> is the API-facing name.</div>
+</section>
+
+<!-- 5. Shell Basics -->
+<section id="shell">
+<h2><span class="num">5</span> MongoDB Shell (mongosh) Basics</h2>
+<div class="code-wrap"><div class="code-label">mongosh</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="cmt">// Connect and select database</span>
+<span class="fn">mongosh</span>
+<span class="kw">use</span> whatsapp_saas       <span class="cmt">// switch to app database</span>
+<span class="fn">show</span> collections        <span class="cmt">// list all collections</span>
+
+<span class="cmt">// ── Count ────────────────────────────────────────────────</span>
+db.messages.<span class="fn">countDocuments</span>()
+db.messages.<span class="fn">countDocuments</span>({<span class="field">direction</span>:<span class="str">"outbound"</span>})
+
+<span class="cmt">// ── Find ─────────────────────────────────────────────────</span>
+db.users.<span class="fn">find</span>()                                  <span class="cmt">// all docs</span>
+db.users.<span class="fn">findOne</span>({<span class="field">email</span>:<span class="str">"owner@demo.com"</span>})       <span class="cmt">// first match</span>
+db.users.<span class="fn">find</span>({<span class="field">role</span>:<span class="str">"TenantOwner"</span>}).<span class="fn">pretty</span>()   <span class="cmt">// formatted</span>
+db.users.<span class="fn">find</span>({}, {<span class="field">email</span>:<span class="num-c">1</span>, <span class="field">role</span>:<span class="num-c">1</span>, <span class="field">_id</span>:<span class="num-c">0</span>})     <span class="cmt">// projection</span>
+
+<span class="cmt">// ── Sort & Limit ─────────────────────────────────────────</span>
+db.messages.<span class="fn">find</span>().<span class="fn">sort</span>({<span class="field">created_at</span>:<span class="num-c">-1</span>}).<span class="fn">limit</span>(<span class="num-c">5</span>)
+
+<span class="cmt">// ── Update ───────────────────────────────────────────────</span>
+db.users.<span class="fn">updateOne</span>(
+  {<span class="field">email</span>:<span class="str">"owner@demo.com"</span>},
+  {<span class="op">$set</span>: {<span class="field">full_name</span>:<span class="str">"Demo Owner"</span>}}
+)
+
+<span class="cmt">// ── Upsert ───────────────────────────────────────────────</span>
+db.conversations.<span class="fn">updateOne</span>(
+  {<span class="field">id</span>:<span class="str">"conv_xxx"</span>},
+  {<span class="op">$set</span>:{<span class="field">updated_at</span>:<span class="str">"now"</span>}, <span class="op">$setOnInsert</span>:{<span class="field">status</span>:<span class="str">"open"</span>}},
+  {<span class="field">upsert</span>:<span class="kw">true</span>}
+)
+
+<span class="cmt">// ── Aggregation ──────────────────────────────────────────</span>
+db.messages.<span class="fn">aggregate</span>([
+  {<span class="op">$match</span>: {<span class="field">direction</span>:<span class="str">"outbound"</span>}},
+  {<span class="op">$group</span>: {<span class="field">_id</span>:<span class="str">"$status"</span>, <span class="field">count</span>:{<span class="op">$sum</span>:<span class="num-c">1</span>}}}
+])
+
+<span class="cmt">// ── Query Operators ──────────────────────────────────────</span>
+{<span class="field">age</span>: {<span class="op">$gt</span>:<span class="num-c">18</span>}}               <span class="cmt">// greater than</span>
+{<span class="field">status</span>: {<span class="op">$in</span>:[<span class="str">"sent"</span>,<span class="str">"delivered"</span>]}}  <span class="cmt">// in list</span>
+{<span class="field">error</span>: {<span class="op">$exists</span>:<span class="kw">true</span>}}      <span class="cmt">// field exists</span>
+{<span class="op">$or</span>: [{<span class="field">a</span>:<span class="num-c">1</span>},{<span class="field">b</span>:<span class="num-c">2</span>}]}        <span class="cmt">// logical OR</span></pre></div>
+</section>
+
+<!-- 6. Overview -->
+<section id="overview">
+<h2><span class="num">6</span> Application Database Overview</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Collection</th><th>Docs</th><th>Purpose</th></tr>
+<tr><td><code>users</code></td><td>3</td><td>Platform users across all tenants</td></tr>
+<tr><td><code>tenants</code></td><td>2</td><td>Client companies</td></tr>
+<tr><td><code>refresh_tokens</code></td><td>35</td><td>Session token hashes <span class="badge badge-amber">TTL 14d</span></td></tr>
+<tr><td><code>password_resets</code></td><td>0</td><td>One-time reset tokens <span class="badge badge-amber">TTL 30m</span></td></tr>
+<tr><td><code>wabas</code></td><td>3</td><td>WhatsApp Business Accounts</td></tr>
+<tr><td><code>waba_credentials</code></td><td>3</td><td>Fernet-encrypted Meta API tokens</td></tr>
+<tr><td><code>phone_numbers</code></td><td>5</td><td>Phone numbers per WABA</td></tr>
+<tr><td><code>templates</code></td><td>16</td><td>Message templates with components JSON</td></tr>
+<tr><td><code>messages</code></td><td>576</td><td>All inbound + outbound messages</td></tr>
+<tr><td><code>conversations</code></td><td>15</td><td>Conversation threads</td></tr>
+<tr><td><code>webhook_events_raw</code></td><td>6</td><td>Raw Meta webhook payloads</td></tr>
+<tr><td><code>mq_jobs</code></td><td>6</td><td>Background job queue</td></tr>
+<tr><td><code>usage_daily_rollup</code></td><td>266</td><td>Daily cost aggregates (materialised view)</td></tr>
+<tr><td><code>template_perf_rollup</code></td><td>36</td><td>Template performance by month</td></tr>
+<tr><td><code>media_assets</code></td><td>0</td><td>Downloaded media file metadata</td></tr>
+<tr><td><code>audit_log</code></td><td>7</td><td>Immutable action trail</td></tr>
+<tr><td><code>idempotency_keys</code></td><td>0</td><td>Dedup keys for outbound sends <span class="badge badge-amber">TTL 24h</span></td></tr>
+</table></div>
+</section>
+
+<!-- 7. Collections -->
+<section id="collections">
+<h2><span class="num">7</span> All 17 Collections — Schema Reference</h2>
+
+<div class="coll-card">
+<div class="coll-header"><span class="coll-name">users</span><span class="coll-count">3 docs</span></div>
+<div class="code-wrap"><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre>{<span class="str">"_id"</span>: <span class="str">"b541acc1-a0dc-..."</span>,  <span class="cmt">// UUID</span>
+ <span class="str">"email"</span>: <span class="str">"owner@demo.com"</span>,
+ <span class="str">"password_hash"</span>: <span class="str">"$2b$10$..."</span>,     <span class="cmt">// bcrypt</span>
+ <span class="str">"role"</span>: <span class="str">"TenantOwner"</span>,           <span class="cmt">// PlatformSuperAdmin|TenantOwner|TenantAdmin|Agent|Viewer</span>
+ <span class="str">"tenant_id"</span>: <span class="str">"fc26e509-..."</span>,
+ <span class="str">"mfa_enabled"</span>: <span class="kw">false</span>,
+ <span class="str">"mfa_secret_encrypted"</span>: <span class="kw">null</span>}  <span class="cmt">// Fernet-encrypted when set</span></pre></div>
+<div class="code-wrap"><div class="code-label">mongosh queries</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre>db.users.find({}, {<span class="field">email</span>:<span class="num-c">1</span>, <span class="field">role</span>:<span class="num-c">1</span>, <span class="field">tenant_id</span>:<span class="num-c">1</span>, <span class="field">_id</span>:<span class="num-c">0</span>}).pretty()
+db.users.updateOne({<span class="field">email</span>:<span class="str">"owner@demo.com"</span>}, {<span class="op">$set</span>:{<span class="field">mfa_enabled</span>:<span class="kw">false</span>}, <span class="op">$unset</span>:{<span class="field">mfa_secret_encrypted</span>:<span class="str">""</span>}})</pre></div>
+</div>
+
+<div class="coll-card">
+<div class="coll-header"><span class="coll-name">messages</span><span class="coll-count">576 docs — largest collection</span></div>
+<div class="code-wrap"><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre>{<span class="str">"_id"</span>: <span class="str">"8f1e2a3b-..."</span>,
+ <span class="str">"tenant_id"</span>: <span class="str">"fc26e509-..."</span>,
+ <span class="str">"conversation_id"</span>: <span class="str">"conv_phone_demo_us_001_14155550101"</span>,
+ <span class="str">"direction"</span>: <span class="str">"outbound"</span>,        <span class="cmt">// outbound | inbound</span>
+ <span class="str">"msg_type"</span>: <span class="str">"template"</span>,           <span class="cmt">// text|template|image|video|audio|document|location|contacts|interactive|reaction</span>
+ <span class="str">"status"</span>: <span class="str">"delivered"</span>,           <span class="cmt">// queued→sent→delivered→read | failed</span>
+ <span class="str">"template_name"</span>: <span class="str">"order_shipped"</span>,
+ <span class="str">"meta_message_id"</span>: <span class="str">"wamid.HBg..."</span>,
+ <span class="str">"pricing_category"</span>: <span class="str">"utility"</span>,
+ <span class="str">"pricing_billable"</span>: <span class="kw">true</span>,
+ <span class="str">"cost_amount"</span>: <span class="num-c">0.015</span>,
+ <span class="str">"country_code"</span>: <span class="str">"US"</span>,
+ <span class="str">"month"</span>: <span class="str">"2026-07"</span>,              <span class="cmt">// monthly partition field</span>
+ <span class="str">"created_at"</span>: <span class="str">"2026-07-05T09:45:00Z"</span>}</pre></div>
+<div class="code-wrap"><div class="code-label">mongosh queries</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="cmt">// Status breakdown</span>
+db.messages.aggregate([
+  {<span class="op">$match</span>:{<span class="field">direction</span>:<span class="str">"outbound"</span>}},
+  {<span class="op">$group</span>:{<span class="field">_id</span>:<span class="str">"$status"</span>, <span class="field">count</span>:{<span class="op">$sum</span>:<span class="num-c">1</span>}}}
+])
+<span class="cmt">// Thread messages</span>
+db.messages.find({<span class="field">conversation_id</span>:<span class="str">"conv_phone_demo_us_001_14155550101"</span>}).sort({<span class="field">created_at</span>:<span class="num-c">1</span>})</pre></div>
+</div>
+
+<div class="coll-card">
+<div class="coll-header"><span class="coll-name">conversations</span><span class="coll-count">15 docs</span></div>
+<div class="code-wrap"><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre>{<span class="str">"_id"</span>: <span class="str">"conv_phone_demo_us_001_14155550101"</span>,  <span class="cmt">// composite ID</span>
+ <span class="str">"tenant_id"</span>: <span class="str">"fc26e509-..."</span>,
+ <span class="str">"phone_number_id"</span>: <span class="str">"phone_demo_us_001"</span>,
+ <span class="str">"contact_wa_id"</span>: <span class="str">"14155550101"</span>,
+ <span class="str">"status"</span>: <span class="str">"open"</span>,                  <span class="cmt">// open | closed</span>
+ <span class="str">"assigned_to"</span>: <span class="kw">null</span>,
+ <span class="str">"unread_count"</span>: <span class="num-c">2</span>,
+ <span class="str">"last_inbound_at"</span>: <span class="str">"2026-07-05T09:44:00Z"</span>,  <span class="cmt">// 24h window starts here</span>
+ <span class="str">"free_entry_point_expires_at"</span>: <span class="kw">null</span>}</pre></div>
+<div class="code-wrap"><div class="code-label">mongosh queries</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="cmt">// Conversations with open 24h service window</span>
+const cutoff = new <span class="fn">Date</span>(Date.now() - <span class="num-c">24</span>*<span class="num-c">60</span>*<span class="num-c">60</span>*<span class="num-c">1000</span>).toISOString()
+db.conversations.find({
+  <span class="field">status</span>: <span class="str">"open"</span>,
+  <span class="field">last_inbound_at</span>: {<span class="op">$gt</span>: cutoff}
+})</pre></div>
+</div>
+
+<div class="coll-card">
+<div class="coll-header"><span class="coll-name">usage_daily_rollup</span><span class="coll-count">266 docs — materialised billing aggregate</span></div>
+<div class="code-wrap"><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre>{<span class="str">"_id"</span>: <span class="str">"fc26e509-...:2026-07-05:marketing:US"</span>,  <span class="cmt">// composite key</span>
+ <span class="str">"tenant_id"</span>: <span class="str">"fc26e509-..."</span>,
+ <span class="str">"day"</span>: <span class="str">"2026-07-05"</span>,
+ <span class="str">"category"</span>: <span class="str">"marketing"</span>,         <span class="cmt">// marketing|utility|authentication|service</span>
+ <span class="str">"country_code"</span>: <span class="str">"US"</span>,
+ <span class="str">"delivered_count"</span>: <span class="num-c">45</span>,
+ <span class="str">"billable_count"</span>: <span class="num-c">45</span>,
+ <span class="str">"free_count"</span>: <span class="num-c">0</span>,
+ <span class="str">"cost_amount"</span>: <span class="num-c">1.1250</span>,
+ <span class="str">"cost_currency"</span>: <span class="str">"USD"</span>}</pre></div>
+<div class="code-wrap"><div class="code-label">mongosh queries</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="cmt">// Total cost by category for last 30 days</span>
+const since = new <span class="fn">Date</span>(Date.now()-<span class="num-c">30</span>*<span class="num-c">86400000</span>).toISOString().slice(<span class="num-c">0</span>,<span class="num-c">10</span>)
+db.usage_daily_rollup.aggregate([
+  {<span class="op">$match</span>:{<span class="field">tenant_id</span>:<span class="str">"fc26e509-..."</span>, <span class="field">day</span>:{<span class="op">$gte</span>:since}}},
+  {<span class="op">$group</span>:{<span class="field">_id</span>:<span class="str">"$category"</span>, <span class="field">total</span>:{<span class="op">$sum</span>:<span class="str">"$cost_amount"</span>}}}
+])</pre></div>
+</div>
+
+<div class="coll-card">
+<div class="coll-header"><span class="coll-name">mq_jobs</span><span class="coll-count">6 docs — job queue</span></div>
+<div class="code-wrap"><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre>{<span class="str">"_id"</span>: <span class="str">"9a8b7c6d-..."</span>,
+ <span class="str">"type"</span>: <span class="str">"process_webhook"</span>,      <span class="cmt">// process_webhook | sync_templates_waba</span>
+ <span class="str">"payload"</span>: {<span class="str">"event_id"</span>: <span class="str">"..."</span>},
+ <span class="str">"status"</span>: <span class="str">"done"</span>,              <span class="cmt">// queued → processing → done | failed</span>
+ <span class="str">"attempts"</span>: <span class="num-c">1</span>,
+ <span class="str">"claimed_at"</span>: <span class="str">"2026-07-05T09:45:00Z"</span>,
+ <span class="str">"last_error"</span>: <span class="kw">null</span>}</pre></div>
+<div class="code-wrap"><div class="code-label">mongosh queries</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="cmt">// Queue depth by status</span>
+db.mq_jobs.aggregate([{<span class="op">$group</span>:{<span class="field">_id</span>:<span class="str">"$status"</span>,<span class="field">count</span>:{<span class="op">$sum</span>:<span class="num-c">1</span>}}}])
+<span class="cmt">// Clear completed jobs</span>
+db.mq_jobs.deleteMany({<span class="field">status</span>:<span class="str">"done"</span>})</pre></div>
+</div>
+
+</section>
+
+<!-- 8. Indexes -->
+<section id="indexes">
+<h2><span class="num">8</span> Indexes — Design & Rationale</h2>
+<div class="idx-row header">
+  <span>Collection</span><span>Index key</span><span>Type</span><span>Why it exists</span>
+</div>
+<div class="idx-row"><span class="idx-coll">users</span><span class="idx-key">unique(email)</span><span><span class="badge badge-red">UNIQUE</span></span><span class="idx-why">Prevent duplicate accounts</span></div>
+<div class="idx-row"><span class="idx-coll">refresh_tokens</span><span class="idx-key">unique(token_hash)</span><span><span class="badge badge-red">UNIQUE</span></span><span class="idx-why">Fast lookup on every API request</span></div>
+<div class="idx-row"><span class="idx-coll">refresh_tokens</span><span class="idx-key">TTL(expires_at)</span><span><span class="badge badge-amber">TTL</span></span><span class="idx-why">Auto-delete expired sessions</span></div>
+<div class="idx-row"><span class="idx-coll">wabas</span><span class="idx-key">unique(waba_id)</span><span><span class="badge badge-red">UNIQUE</span></span><span class="idx-why">Meta waba_id is globally unique</span></div>
+<div class="idx-row"><span class="idx-coll">phone_numbers</span><span class="idx-key">unique(phone_number_id)</span><span><span class="badge badge-red">UNIQUE</span></span><span class="idx-why">Meta phone ID is unique</span></div>
+<div class="idx-row"><span class="idx-coll">templates</span><span class="idx-key">unique(tenant+waba+name+lang)</span><span><span class="badge badge-red">UNIQUE</span></span><span class="idx-why">Prevent duplicate templates</span></div>
+<div class="idx-row"><span class="idx-coll">messages</span><span class="idx-key">(tenant_id, created_at DESC)</span><span><span class="badge badge-blue">COMPOUND</span></span><span class="idx-why">Default list query — most recent first</span></div>
+<div class="idx-row"><span class="idx-coll">messages</span><span class="idx-key">(tenant_id, conversation_id, created_at)</span><span><span class="badge badge-blue">COMPOUND</span></span><span class="idx-why">Fetch thread messages in order</span></div>
+<div class="idx-row"><span class="idx-coll">messages</span><span class="idx-key">(tenant_id, month, created_at DESC)</span><span><span class="badge badge-blue">COMPOUND</span></span><span class="idx-why">Monthly partition queries</span></div>
+<div class="idx-row"><span class="idx-coll">messages</span><span class="idx-key">(meta_message_id)</span><span><span class="badge badge-green">SPARSE</span></span><span class="idx-why">Update message when webhook arrives</span></div>
+<div class="idx-row"><span class="idx-coll">conversations</span><span class="idx-key">(phone_number_id, contact_wa_id)</span><span><span class="badge badge-blue">COMPOUND</span></span><span class="idx-why">Upsert conversation on inbound message</span></div>
+<div class="idx-row"><span class="idx-coll">usage_daily_rollup</span><span class="idx-key">(tenant_id, day DESC)</span><span><span class="badge badge-blue">COMPOUND</span></span><span class="idx-why">Usage dashboard queries</span></div>
+<div class="idx-row"><span class="idx-coll">usage_daily_rollup</span><span class="idx-key">(day DESC)</span><span><span class="badge badge-green">GLOBAL</span></span><span class="idx-why">Platform cross-tenant dashboard</span></div>
+<div class="idx-row"><span class="idx-coll">idempotency_keys</span><span class="idx-key">TTL(created_at, 86400s)</span><span><span class="badge badge-amber">TTL</span></span><span class="idx-why">Auto-expire after 24 hours</span></div>
+<div class="idx-row"><span class="idx-coll">mq_jobs</span><span class="idx-key">(status, claimed_at)</span><span><span class="badge badge-blue">COMPOUND</span></span><span class="idx-why">Atomic job claiming by worker</span></div>
+
+<h3>Inspect an index from mongosh</h3>
+<div class="code-wrap"><div class="code-label">mongosh</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="cmt">// List all indexes on messages</span>
+db.messages.<span class="fn">getIndexes</span>()
+
+<span class="cmt">// Explain query — check IXSCAN vs COLLSCAN</span>
+db.messages.<span class="fn">find</span>({<span class="field">tenant_id</span>:<span class="str">"fc26e509-..."</span>}).<span class="fn">explain</span>(<span class="str">"executionStats"</span>)
+<span class="cmt">// Look for: "stage": "IXSCAN" ← good</span>
+<span class="cmt">//           "stage": "COLLSCAN" ← bad (no index used)</span></pre></div>
+</section>
+
+<!-- 9. Connect -->
+<section id="connect">
+<h2><span class="num">9</span> How the App Connects — Motor Driver</h2>
+<div class="code-wrap"><div class="code-label">backend/.env</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre>MONGO_URL=mongodb://localhost:27017
+DB_NAME=whatsapp_saas</pre></div>
+
+<div class="code-wrap"><div class="code-label">python — app/db.py (connection setup)</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="kw">from</span> motor.motor_asyncio <span class="kw">import</span> AsyncIOMotorClient, AsyncIOMotorDatabase
+
+_client: AsyncIOMotorClient | <span class="kw">None</span> = <span class="kw">None</span>
+_db: AsyncIOMotorDatabase | <span class="kw">None</span> = <span class="kw">None</span>
+
+<span class="kw">def</span> <span class="fn">get_db</span>() -> AsyncIOMotorDatabase:
+    <span class="kw">global</span> _client, _db
+    <span class="kw">if</span> _db <span class="kw">is None</span>:
+        _client = AsyncIOMotorClient(os.environ[<span class="str">"MONGO_URL"</span>])
+        _db = _client[os.environ.get(<span class="str">"DB_NAME"</span>, <span class="str">"whatsapp_saas"</span>)]
+    <span class="kw">return</span> _db</pre></div>
+
+<div class="code-wrap"><div class="code-label">python — using the db in a route</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="kw">from</span> .db <span class="kw">import</span> get_db
+
+<span class="op">@router.get</span>(<span class="str">"/conversations"</span>)
+<span class="kw">async def</span> <span class="fn">list_conversations</span>(p: Principal = Depends(require_tenant)):
+    db = <span class="fn">get_db</span>()                          <span class="cmt"># get the db handle</span>
+    docs = <span class="kw">await</span> db.conversations           <span class="cmt"># access a collection</span>
+        .<span class="fn">find</span>({<span class="str">"tenant_id"</span>: p.tenant_id})   <span class="cmt"># ALWAYS filter by tenant (RLS)</span>
+        .<span class="fn">sort</span>(<span class="str">"last_inbound_at"</span>, <span class="num-c">-1</span>)       <span class="cmt"># most recent first</span>
+        .<span class="fn">limit</span>(<span class="num-c">50</span>)
+        .<span class="fn">to_list</span>(<span class="num-c">50</span>)                        <span class="cmt"># execute → Python list</span>
+    <span class="kw">return</span> docs</pre></div>
+</section>
+
+<!-- 10. Patterns -->
+<section id="patterns">
+<h2><span class="num">10</span> Key Query Patterns</h2>
+
+<h3>Pattern 1 — Tenant-Scoped Query (RLS)</h3>
+<div class="code-wrap"><div class="code-label">python</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="cmt"># CORRECT — always scope to tenant_id from JWT</span>
+docs = <span class="kw">await</span> db.messages.<span class="fn">find</span>({<span class="str">"tenant_id"</span>: p.tenant_id}).<span class="fn">to_list</span>(<span class="num-c">50</span>)
+
+<span class="cmt"># WRONG — never query without tenant scope</span>
+docs = <span class="kw">await</span> db.messages.<span class="fn">find</span>({}).<span class="fn">to_list</span>(<span class="num-c">50</span>)  <span class="cmt"># returns ALL tenants' data!</span></pre></div>
+
+<h3>Pattern 2 — Idempotent Upsert</h3>
+<div class="code-wrap"><div class="code-label">python</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="kw">await</span> db.conversations.<span class="fn">update_one</span>(
+    {<span class="str">"id"</span>: conv_id, <span class="str">"tenant_id"</span>: tenant_id},   <span class="cmt"># filter (identity)</span>
+    {
+        <span class="str">"$set"</span>: {<span class="str">"last_inbound_at"</span>: now},      <span class="cmt"># runs EVERY time</span>
+        <span class="str">"$inc"</span>: {<span class="str">"unread_count"</span>: <span class="num-c">1</span>},           <span class="cmt"># runs EVERY time</span>
+        <span class="str">"$setOnInsert"</span>: {                      <span class="cmt"># runs ONLY on first insert</span>
+            <span class="str">"_id"</span>: conv_id,
+            <span class="str">"status"</span>: <span class="str">"open"</span>,
+            <span class="str">"created_at"</span>: now,
+        },
+    },
+    upsert=<span class="kw">True</span>,
+)</pre></div>
+
+<h3>Pattern 3 — Atomic Job Claim</h3>
+<div class="code-wrap"><div class="code-label">python</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre>job = <span class="kw">await</span> db.mq_jobs.<span class="fn">find_one_and_update</span>(
+    {
+        <span class="str">"$or"</span>: [{<span class="str">"status"</span>: <span class="str">"queued"</span>},
+               {<span class="str">"status"</span>: <span class="str">"processing"</span>, <span class="str">"claimed_at"</span>: {<span class="str">"$lt"</span>: stale_cutoff}}],
+        <span class="str">"attempts"</span>: {<span class="str">"$lt"</span>: <span class="num-c">5</span>},
+    },
+    {<span class="str">"$set"</span>: {<span class="str">"status"</span>: <span class="str">"processing"</span>, <span class="str">"claimed_at"</span>: now},
+     <span class="str">"$inc"</span>: {<span class="str">"attempts"</span>: <span class="num-c">1</span>}},
+    sort=[(<span class="str">"created_at"</span>, <span class="num-c">1</span>)],  <span class="cmt"># FIFO order</span>
+    return_document=<span class="kw">True</span>,
+)
+<span class="cmt"># Only ONE worker ever gets this job — guaranteed by MongoDB atomicity</span></pre></div>
+</section>
+
+<!-- 11. Aggregation -->
+<section id="aggregation">
+<h2><span class="num">11</span> Aggregation Pipelines</h2>
+<div class="code-wrap"><div class="code-label">mongosh — template performance stats</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre>db.messages.aggregate([
+  {<span class="op">$match</span>: {<span class="field">tenant_id</span>:<span class="str">"fc26e509-..."</span>, <span class="field">direction</span>:<span class="str">"outbound"</span>, <span class="field">template_name</span>:{<span class="op">$ne</span>:<span class="kw">null</span>}}},
+  {<span class="op">$group</span>: {
+    <span class="field">_id</span>: <span class="str">"$template_name"</span>,
+    <span class="field">sent</span>: {<span class="op">$sum</span>: <span class="num-c">1</span>},
+    <span class="field">delivered</span>: {<span class="op">$sum</span>: {<span class="op">$cond</span>:[{<span class="op">$in</span>:[<span class="str">"$status"</span>,[<span class="str">"delivered"</span>,<span class="str">"read"</span>]]},<span class="num-c">1</span>,<span class="num-c">0</span>]}},
+    <span class="field">read</span>: {<span class="op">$sum</span>: {<span class="op">$cond</span>:[{<span class="op">$eq</span>:[<span class="str">"$status"</span>,<span class="str">"read"</span>]},<span class="num-c">1</span>,<span class="num-c">0</span>]}}
+  }},
+  {<span class="op">$sort</span>: {<span class="field">sent</span>: <span class="num-c">-1</span>}}
+])</pre></div>
+
+<div class="code-wrap"><div class="code-label">mongosh — daily timeseries</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre>db.messages.aggregate([
+  {<span class="op">$match</span>: {<span class="field">tenant_id</span>:<span class="str">"fc26e509-..."</span>, <span class="field">created_at</span>:{<span class="op">$gte</span>:<span class="str">"2026-06-01"</span>}}},
+  {<span class="op">$addFields</span>: {<span class="field">day</span>: {<span class="op">$substr</span>:[<span class="str">"$created_at"</span>,<span class="num-c">0</span>,<span class="num-c">10</span>]}}},
+  {<span class="op">$group</span>: {<span class="field">_id</span>:{<span class="field">day</span>:<span class="str">"$day"</span>,<span class="field">dir</span>:<span class="str">"$direction"</span>}, <span class="field">count</span>:{<span class="op">$sum</span>:<span class="num-c">1</span>}}},
+  {<span class="op">$sort</span>: {<span class="str">"_id.day"</span>:<span class="num-c">1</span>}}
+])</pre></div>
+</section>
+
+<!-- 12. TTL -->
+<section id="ttl">
+<h2><span class="num">13</span> TTL (Auto-Expiry) Indexes</h2>
+<div class="callout"><strong>How TTL works:</strong> MongoDB's background TTL monitor runs every 60 seconds. It deletes any document where <code>field_value + expireAfterSeconds ≤ current time</code>. Zero cron jobs or application cleanup code needed.</div>
+<div class="tbl-wrap"><table>
+<tr><th>Collection</th><th>TTL field</th><th>Expires after</th><th>Purpose</th></tr>
+<tr><td><code>refresh_tokens</code></td><td><code>expires_at</code></td><td>When <code>expires_at</code> passes (14 days)</td><td>Auto-logout idle sessions</td></tr>
+<tr><td><code>password_resets</code></td><td><code>expires_at</code></td><td>When <code>expires_at</code> passes (30 min)</td><td>Expire reset tokens</td></tr>
+<tr><td><code>idempotency_keys</code></td><td><code>created_at</code></td><td>24 hours after creation</td><td>Keep dedup window to 24h only</td></tr>
+</table></div>
+<div class="code-wrap"><div class="code-label">mongosh — verify TTL index</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="cmt">// Confirm TTL is configured</span>
+db.refresh_tokens.<span class="fn">getIndexes</span>()
+<span class="cmt">// Look for: "expireAfterSeconds": 0
+
+// Manual cleanup (if TTL hasn't run yet)</span>
+db.refresh_tokens.deleteMany({<span class="field">expires_at</span>: {<span class="op">$lt</span>: <span class="kw">new</span> <span class="fn">Date</span>()}})</pre></div>
+</section>
+
+<!-- 14. Maintenance -->
+<section id="maintenance">
+<h2><span class="num">14</span> Useful Maintenance Queries</h2>
+<div class="code-wrap"><div class="code-label">mongosh — health & stats</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="cmt">// Connection health</span>
+db.<span class="fn">runCommand</span>({<span class="field">connectionStatus</span>: <span class="num-c">1</span>})
+
+<span class="cmt">// Count docs in every collection</span>
+db.<span class="fn">getCollectionNames</span>().forEach(c => {
+  <span class="fn">print</span>(c + <span class="str">": "</span> + db[c].<span class="fn">countDocuments</span>())
+})
+
+<span class="cmt">// Storage per collection</span>
+db.<span class="fn">getCollectionNames</span>()
+  .map(c => ({name:c, size: db[c].<span class="fn">stats</span>().storageSize}))
+  .sort((a,b) => b.size - a.size)
+  .forEach(x => <span class="fn">print</span>(x.name + <span class="str">": "</span> + (x.size/<span class="num-c">1024</span>).toFixed(<span class="num-c">1</span>) + <span class="str">" KB"</span>))</pre></div>
+
+<div class="code-wrap"><div class="code-label">mongosh — cleanup</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="cmt">// Clear completed jobs (keep last 7 days)</span>
+const week = new <span class="fn">Date</span>(Date.now()-<span class="num-c">7</span>*<span class="num-c">86400000</span>).toISOString()
+db.mq_jobs.deleteMany({<span class="field">status</span>:<span class="str">"done"</span>, <span class="field">completed_at</span>:{<span class="op">$lt</span>:week}})
+
+<span class="cmt">// Full reset (dev only!) ⚠️</span>
+db.<span class="fn">dropDatabase</span>()
+<span class="cmt">// Restart the backend — it auto-re-seeds users + demo data</span></pre></div>
+</section>
+
+<!-- 15. Backup -->
+<section id="backup">
+<h2><span class="num">15</span> Backup & Restore</h2>
+<div class="code-wrap"><div class="code-label">bash — backup</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="cmt"># Full backup to a directory</span>
+mongodump \
+  --uri=<span class="str">"mongodb://localhost:27017/whatsapp_saas"</span> \
+  --out=<span class="str">"./backup/$(date +%Y-%m-%d)"</span>
+
+<span class="cmt"># Compressed single-file backup</span>
+mongodump \
+  --uri=<span class="str">"mongodb://localhost:27017/whatsapp_saas"</span> \
+  --gzip \
+  --archive=<span class="str">"./backup/whatsapp_saas_$(date +%Y-%m-%d).gz"</span></pre></div>
+
+<div class="code-wrap"><div class="code-label">bash — restore</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="cmt"># Restore from directory</span>
+mongorestore \
+  --uri=<span class="str">"mongodb://localhost:27017"</span> \
+  --db=<span class="str">"whatsapp_saas"</span> \
+  <span class="str">"./backup/2026-07-05/whatsapp_saas/"</span>
+
+<span class="cmt"># Restore from compressed archive</span>
+mongorestore \
+  --uri=<span class="str">"mongodb://localhost:27017"</span> \
+  --gzip \
+  --archive=<span class="str">"./backup/whatsapp_saas_2026-07-05.gz"</span></pre></div>
+</section>
+
+<!-- 17. Errors -->
+<section id="errors">
+<h2><span class="num">17</span> Common Errors & Fixes</h2>
+<div class="callout err"><strong>ServerSelectionTimeoutError: localhost:27017</strong>
+MongoDB is not running. Fix: <code>brew services start mongodb-community@7.0</code></div>
+<div class="callout err"><strong>WriteError: Updating the path 'unread_count' would create a conflict</strong>
+You used both <code>$inc</code> and <code>$setOnInsert</code> on the same field. Remove the field from <code>$setOnInsert</code> — <code>$inc</code> will set it to 1 on insert automatically.</div>
+<div class="callout err"><strong>DuplicateKeyError: E11000 duplicate key</strong>
+Violates a unique index. Use upsert instead of insertOne, or check which index is violated with <code>db.collection.getIndexes()</code></div>
+<div class="callout err"><strong>ValidationError: value is not a valid Fernet key</strong>
+The TOKEN_ENCRYPTION_KEY in .env is wrong. Regenerate:
+<code>python3 -c "import base64,secrets; print(base64.urlsafe_b64encode(secrets.token_bytes(32)).decode())"</code></div>
+</section>
+
+<div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--border);text-align:center;color:var(--muted);font-size:.75rem">
+  WhatsApp Business Platform · MongoDB Guide · July 2026
+</div>
+
+</main>
+</div>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.code-wrap').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copied';
+    btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('ok'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
