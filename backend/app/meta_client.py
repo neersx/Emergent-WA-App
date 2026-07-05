@@ -312,7 +312,8 @@ class MetaClient:
         out = []
         for t in data:
             body = None
-            for c in t.get("components", []) or []:
+            components = t.get("components") or []
+            for c in components:
                 if c.get("type") == "BODY":
                     body = c.get("text")
                     break
@@ -323,9 +324,70 @@ class MetaClient:
                     "category": t.get("category"),
                     "status": t.get("status"),
                     "body": body,
+                    "components": components,
+                    "meta_template_id": str(t.get("id") or ""),
+                    "rejection_reason": t.get("rejected_reason"),
                 }
             )
         return out
+
+    async def create_template(
+        self,
+        waba_id: str,
+        business_token: str,
+        name: str,
+        language: str,
+        category: str,
+        components: list[dict],
+    ) -> dict[str, Any]:
+        if self.mock:
+            import secrets as _s
+            return {
+                "id": f"mock_tpl_{_s.token_hex(8)}",
+                "status": "PENDING",
+                "category": category,
+            }
+        payload = {
+            "name": name,
+            "language": language,
+            "category": category,
+            "components": components,
+        }
+        return await self._request(
+            "POST", f"/{waba_id}/message_templates",
+            token=business_token,
+            json=payload,
+        )
+
+    async def delete_template(
+        self,
+        waba_id: str,
+        business_token: str,
+        name: str,
+        meta_template_id: str | None = None,
+    ) -> dict[str, Any]:
+        if self.mock:
+            return {"success": True}
+        params: dict = {"name": name}
+        if meta_template_id:
+            params["hsm_id"] = meta_template_id
+        return await self._request(
+            "DELETE", f"/{waba_id}/message_templates",
+            token=business_token,
+            params=params,
+        )
+
+    async def get_media_download_url(
+        self, media_id: str, business_token: str
+    ) -> str | None:
+        if self.mock:
+            return None
+        try:
+            r = await self._request("GET", f"/{media_id}", token=business_token)
+            return r.get("url")
+        except Exception as exc:
+            logger.warning(f"get_media_download_url {media_id}: {exc}")
+            return None
 
 
 meta_client = MetaClient()

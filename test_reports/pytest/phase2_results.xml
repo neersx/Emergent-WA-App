@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="9" time="1.207" timestamp="2026-07-05T05:59:56.968241+00:00" hostname="agent-env-5a10e0c5-b4e7-44a4-a0d5-4f1914ff7455"><testcase classname="tests.test_phase2.TestAnalytics" name="test_usage_daily_returns_array" time="0.429" /><testcase classname="tests.test_phase2.TestInbox" name="test_get_conversations" time="0.385" /><testcase classname="tests.test_phase2.TestInbox" name="test_simulate_inbound_creates_conversation" time="0.043"><failure message="assert 400 in [200, 201]&#10; +  where 400 = &lt;Response [400]&gt;.status_code">backend/tests/test_phase2.py:51: in test_simulate_inbound_creates_conversation
+    assert r.status_code in [200, 201]
+E   assert 400 in [200, 201]
+E    +  where 400 = &lt;Response [400]&gt;.status_code</failure></testcase><testcase classname="tests.test_phase2.TestAnalytics" name="test_usage_cost_returns_structure" time="0.063" /><testcase classname="tests.test_phase2.TestInbox" name="test_get_conversations_after_simulate" time="0.040" /><testcase classname="tests.test_phase2.TestTemplates" name="test_get_templates_returns_array" time="0.088" /><testcase classname="tests.test_phase2.TestAnalytics" name="test_analytics_messages_endpoint" time="0.041"><failure message="assert 404 == 200&#10; +  where 404 = &lt;Response [404]&gt;.status_code">backend/tests/test_phase2.py:86: in test_analytics_messages_endpoint
+    assert r.status_code == 200
+E   assert 404 == 200
+E    +  where 404 = &lt;Response [404]&gt;.status_code</failure></testcase><testcase classname="tests.test_phase2.TestAnalytics" name="test_analytics_summary" time="0.087"><failure message="assert 404 == 200&#10; +  where 404 = &lt;Response [404]&gt;.status_code">backend/tests/test_phase2.py:91: in test_analytics_summary
+    assert r.status_code == 200
+E   assert 404 == 200
+E    +  where 404 = &lt;Response [404]&gt;.status_code</failure></testcase><testcase classname="tests.test_phase2.TestTemplates" name="test_get_templates_status_filter" time="0.043" /></testsuite></testsuites>

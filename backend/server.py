@@ -28,12 +28,14 @@ from app.config import settings
 from app.db import close_db, ensure_indexes, get_db
 from app.health import router as health_router
 from app.inbox import router as inbox_router
+from app.media import router as media_router
 from app.messaging import router as messaging_router
 from app.onboarding import router as onboarding_router
 from app.seed import seed_initial_data
 from app.templates import router as templates_router
 from app.webhooks import router as webhook_router
 from app.worker import start_worker, stop_worker
+from app.ws import router as ws_router
 
 
 # ----- Logging -----
@@ -104,10 +106,12 @@ app.include_router(onboarding_router)
 app.include_router(messaging_router)
 app.include_router(templates_router)
 app.include_router(inbox_router)
+app.include_router(media_router)
 app.include_router(analytics_router)
 app.include_router(admin_router)
 app.include_router(webhook_router)
 app.include_router(health_router)
+app.include_router(ws_router)
 
 
 @app.get("/api/")

@@ -240,3 +240,73 @@ async def by_phone(
         )
     out.sort(key=lambda x: x["outbound"] + x["inbound"], reverse=True)
     return out
+
+
+@router.get("/usage/daily")
+async def usage_daily(
+    p: Principal = Depends(require_tenant),
+    days: int = Query(default=30, ge=1, le=90),
+):
+    """Daily usage rollup: delivered / billable / free / cost per category."""
+    db = get_db()
+    since = (datetime.now(timezone.utc) - timedelta(days=days)).date().isoformat()
+    docs = await db.usage_daily_rollup.find(
+        {"tenant_id": p.tenant_id, "day": {"$gte": since}}
+    ).sort("day", -1).to_list(500)
+    return [
+        {
+            "day": d["day"],
+            "category": d.get("category", "service"),
+            "country_code": d.get("country_code"),
+            "delivered_count": d.get("delivered_count", 0),
+            "billable_count": d.get("billable_count", 0),
+            "free_count": d.get("free_count", 0),
+            "cost_amount": round(d.get("cost_amount", 0.0), 4),
+            "cost_currency": d.get("cost_currency", "USD"),
+        }
+        for d in docs
+    ]
+
+
+@router.get("/usage/cost")
+async def usage_cost_summary(
+    p: Principal = Depends(require_tenant),
+    days: int = Query(default=30, ge=1, le=90),
+):
+    """Aggregated cost summary by category + overall totals."""
+    db = get_db()
+    since = (datetime.now(timezone.utc) - timedelta(days=days)).date().isoformat()
+    pipeline = [
+        {"$match": {"tenant_id": p.tenant_id, "day": {"$gte": since}}},
+        {
+            "$group": {
+                "_id": "$category",
+                "delivered_count": {"$sum": "$delivered_count"},
+                "billable_count": {"$sum": "$billable_count"},
+                "free_count": {"$sum": "$free_count"},
+                "cost_amount": {"$sum": "$cost_amount"},
+            }
+        },
+        {"$sort": {"cost_amount": -1}},
+    ]
+    by_category = []
+    total_cost = 0.0
+    total_delivered = 0
+    async for r in db.usage_daily_rollup.aggregate(pipeline):
+        cost = round(r.get("cost_amount", 0.0), 4)
+        total_cost += cost
+        total_delivered += r.get("delivered_count", 0)
+        by_category.append({
+            "category": r["_id"] or "service",
+            "delivered_count": r.get("delivered_count", 0),
+            "billable_count": r.get("billable_count", 0),
+            "free_count": r.get("free_count", 0),
+            "cost_amount": cost,
+            "cost_currency": "USD",
+        })
+    return {
+        "window_days": days,
+        "total_cost_usd": round(total_cost, 4),
+        "total_delivered": total_delivered,
+        "by_category": by_category,
+    }

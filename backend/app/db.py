@@ -83,6 +83,16 @@ async def ensure_indexes() -> None:
             unique=True,
             name="uniq_template",
         ),
+        IndexModel([("meta_template_id", ASCENDING)], name="by_meta_tpl_id", sparse=True),
+    ])
+    await db.usage_daily_rollup.create_indexes([
+        IndexModel([("tenant_id", ASCENDING), ("day", DESCENDING)], name="by_tenant_day"),
+    ])
+    await db.messages.create_indexes([
+        IndexModel([("tenant_id", ASCENDING), ("created_at", DESCENDING)], name="by_tenant_time"),
+        IndexModel([("tenant_id", ASCENDING), ("conversation_id", ASCENDING), ("created_at", ASCENDING)], name="by_conv_time"),
+        IndexModel([("meta_message_id", ASCENDING)], name="by_meta_id", sparse=True),
+        IndexModel([("idempotency_key", ASCENDING)], name="by_idem", sparse=True),
     ])
     logger.info("MongoDB indexes ensured")
 

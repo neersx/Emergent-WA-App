@@ -176,3 +176,67 @@ class PhoneNumberPublic(BaseModel):
     verified_name: str | None = None
     quality_rating: str | None = None
     created_at: datetime
+
+
+# ---------- Phase 2: Template component builder ----------
+
+class TemplateStatus(str, Enum):
+    PENDING = "PENDING"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+    PAUSED = "PAUSED"
+    DISABLED = "DISABLED"
+
+
+class TemplateButtonType(str, Enum):
+    QUICK_REPLY = "QUICK_REPLY"
+    URL = "URL"
+    PHONE_NUMBER = "PHONE_NUMBER"
+
+
+class TemplateHeaderFormat(str, Enum):
+    TEXT = "TEXT"
+    IMAGE = "IMAGE"
+    VIDEO = "VIDEO"
+    DOCUMENT = "DOCUMENT"
+    LOCATION = "LOCATION"
+
+
+class TemplateButton(BaseModel):
+    type: TemplateButtonType
+    text: str = Field(min_length=1, max_length=25)
+    url: str | None = Field(default=None, max_length=2000)
+    phone_number: str | None = Field(default=None, max_length=20)
+    url_example: str | None = None  # sample value for URL variable
+
+
+class TemplateComponentSpec(BaseModel):
+    type: Literal["HEADER", "BODY", "FOOTER", "BUTTONS"]
+    format: TemplateHeaderFormat | None = None  # HEADER only
+    text: str | None = Field(default=None, max_length=4096)
+    buttons: list[TemplateButton] | None = None  # BUTTONS only
+    example_header_text: list[str] | None = None
+    example_body_text: list[list[str]] | None = None
+
+
+class TemplateCreateFull(BaseModel):
+    waba_id: str
+    name: str = Field(min_length=1, max_length=512)
+    language: str = Field(default="en_US", min_length=2, max_length=16)
+    category: Literal["UTILITY", "MARKETING", "AUTHENTICATION"] = "UTILITY"
+    components: list[TemplateComponentSpec]
+
+
+# ---------- Phase 2: Inbox / Conversation ----------
+
+class ConversationStatus(str, Enum):
+    open = "open"
+    closed = "closed"
+
+
+class AssignConversationRequest(BaseModel):
+    user_id: str | None = None  # None = unassign
+
+
+class CloseConversationRequest(BaseModel):
+    reason: str | None = Field(default=None, max_length=256)
