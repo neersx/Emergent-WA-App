@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WhatsApp Business Platform — Technical & Functional Documentation</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --primary: #0d9488;
+    --primary-dark: #0f766e;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --muted: #64748b;
+    --heading: #0f172a;
+    --accent: #0ea5e9;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  /* Layout */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar { width: 260px; background: var(--heading); color: #e2e8f0; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; padding: 1.5rem 1rem; font-size: 0.875rem; z-index: 100; }
+  .sidebar h2 { color: var(--primary); font-size: 0.875rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .sidebar a { display: block; padding: 0.35rem 0.5rem; color: #94a3b8; text-decoration: none; border-radius: 4px; transition: all 0.15s; }
+  .sidebar a:hover { color: #fff; background: rgba(255,255,255,0.08); }
+  .sidebar .section-header { color: #64748b; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.75rem 0.5rem 0.25rem; }
+  .main { margin-left: 260px; padding: 2rem 2.5rem; max-width: 1100px; }
+
+  /* Header */
+  .doc-header { background: linear-gradient(135deg, var(--heading) 0%, #1e3a5f 100%); color: white; padding: 3rem 2.5rem; margin: -2rem -2.5rem 2.5rem; }
+  .doc-header .badge { display: inline-block; background: var(--primary); color: white; font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
+  .doc-header h1 { font-size: 2rem; font-weight: 800; margin-bottom: 0.75rem; }
+  .doc-header p { color: #94a3b8; font-size: 1rem; max-width: 640px; }
+  .meta-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem; }
+  .meta-pill { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); color: #e2e8f0; font-size: 0.75rem; padding: 0.25rem 0.75rem; border-radius: 20px; }
+
+  /* Sections */
+  section { margin-bottom: 3rem; }
+  h2.section-title { font-size: 1.4rem; font-weight: 700; color: var(--heading); padding-bottom: 0.75rem; border-bottom: 2px solid var(--border); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
+  h2.section-title .num { background: var(--primary); color: white; width: 1.75rem; height: 1.75rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; flex-shrink: 0; }
+  h3 { font-size: 1rem; font-weight: 600; color: var(--heading); margin: 1.5rem 0 0.75rem; }
+
+  /* Cards */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-weight: 600; color: var(--heading); margin-bottom: 0.5rem; font-size: 0.95rem; }
+  .card-sub { color: var(--muted); font-size: 0.85rem; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+  th { background: var(--heading); color: white; padding: 0.6rem 1rem; text-align: left; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: #f1f5f9; }
+  .table-wrap { border-radius: 8px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 1.5rem; }
+
+  /* Badges */
+  .badge-green { background: #dcfce7; color: #15803d; padding: 0.15rem 0.6rem; border-radius: 12px; font-size: 0.72rem; font-weight: 600; }
+  .badge-blue  { background: #dbeafe; color: #1d4ed8; padding: 0.15rem 0.6rem; border-radius: 12px; font-size: 0.72rem; font-weight: 600; }
+  .badge-amber { background: #fef9c3; color: #92400e; padding: 0.15rem 0.6rem; border-radius: 12px; font-size: 0.72rem; font-weight: 600; }
+  .badge-red   { background: #fee2e2; color: #b91c1c; padding: 0.15rem 0.6rem; border-radius: 12px; font-size: 0.72rem; font-weight: 600; }
+  .badge-purple{ background: #f3e8ff; color: #7c3aed; padding: 0.15rem 0.6rem; border-radius: 12px; font-size: 0.72rem; font-weight: 600; }
+  .badge-gray  { background: #f1f5f9; color: #475569; padding: 0.15rem 0.6rem; border-radius: 12px; font-size: 0.72rem; font-weight: 600; }
+
+  /* Diagram containers */
+  .diagram-wrap { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin: 1rem 0 1.5rem; overflow-x: auto; }
+  .diagram-label { font-size: 0.75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1rem; }
+
+  /* Code */
+  code { background: #f1f5f9; color: #0f172a; padding: 0.15rem 0.4rem; border-radius: 4px; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 0.82em; }
+  pre { background: #0f172a; color: #e2e8f0; padding: 1.25rem 1.5rem; border-radius: 8px; overflow-x: auto; font-size: 0.82rem; margin: 0.75rem 0 1.25rem; line-height: 1.6; }
+  pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+
+  /* Grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } .sidebar { display: none; } .main { margin-left: 0; } }
+
+  /* Stack pills */
+  .tech-pill { display: inline-flex; align-items: center; gap: 0.4rem; background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 0.3rem 0.75rem; font-size: 0.8rem; font-weight: 500; margin: 0.2rem; }
+  .tech-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* Flow boxes */
+  .flow-step { display: flex; gap: 1rem; margin-bottom: 0.75rem; }
+  .flow-num { background: var(--primary); color: white; width: 1.5rem; height: 1.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; margin-top: 0.1rem; }
+  .flow-body strong { display: block; font-size: 0.9rem; color: var(--heading); }
+  .flow-body span { font-size: 0.82rem; color: var(--muted); }
+
+  /* Callout */
+  .callout { border-left: 4px solid var(--primary); background: #f0fdfa; padding: 0.875rem 1.25rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: 0.875rem; }
+  .callout.warn { border-color: var(--warn); background: #fffbeb; }
+  .callout strong { display: block; margin-bottom: 0.3rem; }
+
+  /* Stats row */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+  .stat-box { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; text-align: center; }
+  .stat-box .val { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+  .stat-box .lbl { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- Sidebar -->
+<nav class="sidebar">
+  <h2>WABA Console</h2>
+  <div class="section-header">Overview</div>
+  <a href="#overview">1. Executive Summary</a>
+  <a href="#stack">2. Tech Stack</a>
+  <div class="section-header">Architecture</div>
+  <a href="#arch">3. System Architecture</a>
+  <a href="#multitenant">4. Multi-Tenancy</a>
+  <a href="#security">5. Security</a>
+  <div class="section-header">Data</div>
+  <a href="#datamodel">6. Data Model</a>
+  <a href="#collections">7. Collections</a>
+  <div class="section-header">Flows</div>
+  <a href="#webhook">8. Webhook Flow</a>
+  <a href="#inbound">9. Inbound Message</a>
+  <a href="#outbound">10. Outbound Template</a>
+  <a href="#cost">11. Cost & Billing</a>
+  <a href="#auth">12. Auth Flow</a>
+  <div class="section-header">API</div>
+  <a href="#api">13. API Reference</a>
+  <a href="#websocket">14. WebSocket</a>
+  <div class="section-header">Infrastructure</div>
+  <a href="#infra">15. Infrastructure</a>
+  <a href="#phases">16. Phase Roadmap</a>
+</nav>
+
+<!-- Main content -->
+<main class="main">
+
+  <!-- Header -->
+  <div class="doc-header">
+    <div class="badge">Technical Documentation</div>
+    <h1>WhatsApp Business Management Platform</h1>
+    <p>A multi-tenant SaaS platform for managing WhatsApp Business Accounts — templates, inbound conversations, outbound messaging, and per-message cost tracking — built on the FARM stack.</p>
+    <div class="meta-pills">
+      <span class="meta-pill">Phase 1–2.5 Complete</span>
+      <span class="meta-pill">FARM Stack</span>
+      <span class="meta-pill">Live Mode: META_MOCK_MODE=false</span>
+      <span class="meta-pill">Meta Graph API v21.0</span>
+      <span class="meta-pill">July 2026</span>
+    </div>
+  </div>
+
+  <!-- 1. Executive Summary -->
+  <section id="overview">
+    <h2 class="section-title"><span class="num">1</span> Executive Summary</h2>
+    <div class="stats-row">
+      <div class="stat-box"><div class="val">22</div><div class="lbl">Backend modules</div></div>
+      <div class="stat-box"><div class="val">15</div><div class="lbl">Frontend pages</div></div>
+      <div class="stat-box"><div class="val">17</div><div class="lbl">MongoDB collections</div></div>
+      <div class="stat-box"><div class="val">40+</div><div class="lbl">REST endpoints</div></div>
+    </div>
+    <p style="margin-bottom:1rem">The platform enables <strong>Technology Providers</strong> to onboard client businesses onto WhatsApp via Meta's Embedded Signup flow, manage their message templates, send outbound template messages, receive and reply to inbound messages in a real-time conversation inbox, and track per-message costs with daily rollup billing reports — all with strict multi-tenant isolation.</p>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Functional Scope</div>
+        <div class="card-sub">
+          Multi-tenant auth (JWT + MFA) · Embedded Signup (WABA onboarding) · Template CRUD + Meta Graph submit · Real-time inbox (WebSocket) · Outbound template sending · Cost capture &amp; billing dashboard · Platform super-admin (cross-tenant) · CSV/XLSX export
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Correctness Guarantees</div>
+        <div class="card-sub">
+          24h service-window enforced server-side · Webhook ACK &lt;1s (async worker) · Fernet-encrypted business tokens · HMAC-SHA256 webhook verification · Tenant RLS on every query · Elevated cross-tenant access audited
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Tech Stack -->
+  <section id="stack">
+    <h2 class="section-title"><span class="num">2</span> Tech Stack</h2>
+
+    <h3>Frontend</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Layer</th><th>Technology</th><th>Version</th><th>Role</th></tr>
+        <tr><td>Framework</td><td><strong>React</strong></td><td>19.0</td><td>SPA, component tree, hooks</td></tr>
+        <tr><td>Routing</td><td><strong>React Router DOM</strong></td><td>7.15</td><td>Client-side routing, protected routes</td></tr>
+        <tr><td>Styling</td><td><strong>Tailwind CSS</strong></td><td>3.4</td><td>Utility-first CSS, design system</td></tr>
+        <tr><td>Component Library</td><td><strong>shadcn/ui + Radix UI</strong></td><td>—</td><td>Accessible headless components (Dialog, Select, Tabs, Toast, OTP…)</td></tr>
+        <tr><td>Icons</td><td><strong>Lucide React</strong></td><td>0.516</td><td>SVG icon set</td></tr>
+        <tr><td>Charts</td><td><strong>Recharts</strong></td><td>3.6</td><td>Line, Bar, Pie, Area charts</td></tr>
+        <tr><td>HTTP Client</td><td><strong>Axios</strong></td><td>1.16</td><td>REST API calls, interceptors for token refresh</td></tr>
+        <tr><td>Real-time</td><td><strong>WebSocket API</strong> (native browser)</td><td>—</td><td>Live inbox updates, template status push</td></tr>
+        <tr><td>Forms</td><td><strong>React Hook Form + Zod</strong></td><td>7.56 / 3.24</td><td>Form state, validation schema</td></tr>
+        <tr><td>Animations</td><td><strong>Framer Motion</strong></td><td>11.18</td><td>Micro-animations, transitions</td></tr>
+        <tr><td>Date utilities</td><td><strong>date-fns + dayjs</strong></td><td>4.1 / 1.11</td><td>Date formatting, relative time</td></tr>
+        <tr><td>Build</td><td><strong>CRACO + Webpack</strong></td><td>7.1</td><td>CRA override, path aliases (<code>@/</code>)</td></tr>
+      </table>
+    </div>
+
+    <h3>Backend</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Layer</th><th>Technology</th><th>Version</th><th>Role</th></tr>
+        <tr><td>Framework</td><td><strong>FastAPI</strong></td><td>0.110</td><td>Async REST + WebSocket, OpenAPI docs</td></tr>
+        <tr><td>ASGI Server</td><td><strong>Uvicorn</strong></td><td>0.25</td><td>ASGI server with hot-reload</td></tr>
+        <tr><td>Data validation</td><td><strong>Pydantic v2</strong></td><td>2.13</td><td>Request/response models, type coercion</td></tr>
+        <tr><td>DB Driver</td><td><strong>Motor</strong> (async MongoDB)</td><td>3.3</td><td>All MongoDB I/O, async, indexed queries</td></tr>
+        <tr><td>Auth</td><td><strong>PyJWT + bcrypt + pyotp</strong></td><td>—</td><td>JWT signing, password hashing, TOTP MFA</td></tr>
+        <tr><td>Encryption</td><td><strong>cryptography (Fernet)</strong></td><td>49.0</td><td>Business token encryption at rest</td></tr>
+        <tr><td>HTTP Client</td><td><strong>httpx</strong></td><td>0.28</td><td>Meta Graph API calls (async, retry, circuit breaker)</td></tr>
+        <tr><td>Logging</td><td><strong>loguru</strong></td><td>0.7</td><td>Structured logging with trace-id context</td></tr>
+        <tr><td>Metrics</td><td><strong>prometheus_client</strong></td><td>0.20</td><td>Prometheus metrics endpoint</td></tr>
+        <tr><td>Excel export</td><td><strong>openpyxl</strong></td><td>3.1</td><td>XLSX file generation for usage exports</td></tr>
+        <tr><td>Phone parsing</td><td><strong>phonenumbers</strong></td><td>9.0</td><td>WA ID → country code extraction</td></tr>
+        <tr><td>Config</td><td><strong>python-dotenv</strong></td><td>1.2</td><td>Environment variable loading</td></tr>
+      </table>
+    </div>
+
+    <h3>Database &amp; Infrastructure</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Component</th><th>Technology</th><th>Notes</th></tr>
+        <tr><td>Primary Database</td><td><strong>MongoDB</strong></td><td>17 collections, compound indexes, atomic upserts, TTL indexes</td></tr>
+        <tr><td>Job Queue</td><td><strong>MongoDB-backed queue</strong> (custom)</td><td><code>mq_jobs</code> collection — atomic claim, visibility timeout, retry up to 5×</td></tr>
+        <tr><td>Process Manager</td><td><strong>Supervisor</strong></td><td>Manages frontend (port 3000), backend (port 8001), MongoDB</td></tr>
+        <tr><td>Reverse Proxy</td><td><strong>Nginx</strong></td><td>Routes <code>/api/*</code> → 8001, else → 3000; WebSocket upgrade passthrough</td></tr>
+        <tr><td>Media Storage</td><td><strong>Local disk</strong> (configurable → S3)</td><td><code>MEDIA_STORAGE_MODE=disk|s3</code>; served via HMAC-signed time-limited URLs</td></tr>
+        <tr><td>External API</td><td><strong>Meta Graph API v21.0</strong></td><td>Template CRUD, message sending, media download, webhook subscription</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 3. System Architecture -->
+  <section id="arch">
+    <h2 class="section-title"><span class="num">3</span> System Architecture</h2>
+    <div class="diagram-wrap">
+      <div class="diagram-label">High-Level System Architecture</div>
+      <div class="mermaid">
+graph TB
+    subgraph Browser["🌐 Browser (React 19 SPA)"]
+        UI[UI Pages\nDashboard · Inbox · Templates\nAnalytics · Usage · Platform]
+        FB[Facebook JS SDK\nEmbedded Signup]
+        WS_CLIENT[WebSocket Client\nnative browser API]
+    end
+
+    subgraph Nginx["⚙️ Nginx Reverse Proxy"]
+        ROUTE[/api/* → :8001\n/* → :3000]
+    end
+
+    subgraph Backend["🐍 FastAPI Application (:8001)"]
+        direction TB
+        ROUTES[REST Routers\nauth · onboarding · templates\nmessaging · inbox · analytics\nplatform · webhooks · admin]
+        WS_SERVER[WebSocket\n/api/ws/inbox\nCookie auth]
+        WORKER[Background Worker\nasyncio task\npoll 500ms]
+        META[Meta Graph\nClient\nhttpx + retry]
+    end
+
+    subgraph MongoDB["🍃 MongoDB"]
+        COLLECTIONS[(17 Collections\nusers · tenants · messages\nconversations · templates\nusage_daily_rollup\nmedia_assets · ...)]
+    end
+
+    subgraph MetaAPI["☁️ Meta Graph API v21.0"]
+        GRAPH[graph.facebook.com\nTemplates · Messages\nMedia · Webhooks]
+    end
+
+    subgraph Storage["💾 Media Storage"]
+        DISK[Local Disk\n/app/media/\ntenant-scoped\nsigned URLs]
+    end
+
+    UI -->|axios + cookies| Nginx
+    WS_CLIENT -->|wss://| Nginx
+    Nginx -->|proxy_pass| Backend
+    FB -->|auth code| UI
+    UI -->|POST /onboarding/exchange| Nginx
+    ROUTES <--> MongoDB
+    WORKER <--> MongoDB
+    META -->|Graph API calls| MetaAPI
+    WORKER -->|download media| Storage
+    ROUTES -->|read| Storage
+    MetaAPI -->|webhook POST| Nginx
+    WORKER -->|broadcast| WS_SERVER
+    WS_SERVER -.->|push events| WS_CLIENT
+      </div>
+    </div>
+
+    <h3>Backend Module Map</h3>
+    <div class="diagram-wrap">
+      <div class="diagram-label">Backend Module Dependencies</div>
+      <div class="mermaid">
+graph LR
+    SERVER[server.py\napp factory\nlifespan] --> AUTH_R[auth_routes]
+    SERVER --> ONBOARD[onboarding]
+    SERVER --> MSG[messaging]
+    SERVER --> TPL[templates]
+    SERVER --> INBOX[inbox]
+    SERVER --> ANALYTICS[analytics]
+    SERVER --> PLATFORM[platform\nSuperAdmin]
+    SERVER --> WEBHOOK[webhooks]
+    SERVER --> ADMIN[admin_routes]
+    SERVER --> WS[ws\nWebSocket mgr]
+    SERVER --> MEDIA_R[media\nserving]
+    SERVER --> WORKER_START[worker\nstart/stop]
+
+    AUTH_R --> AUTH[auth.py\nJWT·bcrypt·TOTP]
+    AUTH_R --> DB
+    ONBOARD --> META_CLIENT
+    MSG --> META_CLIENT
+    TPL --> META_CLIENT
+    INBOX --> META_CLIENT
+    WORKER_START --> WORKER[worker.py\njob loop]
+    WORKER --> QUEUE[queue.py\nMongo-backed]
+    WORKER --> META_CLIENT[meta_client.py\nhttpx·retry]
+    WORKER --> MEDIA_DL[media.py\ndownload·store]
+    WORKER --> WS
+
+    AUTH --> CRYPTO[crypto_utils\nFernet encrypt]
+    META_CLIENT --> CONFIG[config.py\nSettings]
+    DB[db.py\nMotor client\nindexes] --> CONFIG
+    TENANCY[tenancy.py\nPrincipal·RBAC] --> AUTH
+
+    style SERVER fill:#0d9488,color:#fff
+    style WORKER fill:#7c3aed,color:#fff
+    style META_CLIENT fill:#0ea5e9,color:#fff
+    style DB fill:#f59e0b,color:#fff
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Multi-Tenancy -->
+  <section id="multitenant">
+    <h2 class="section-title"><span class="num">4</span> Multi-Tenant Architecture</h2>
+    <div class="diagram-wrap">
+      <div class="diagram-label">Tenant Isolation Model</div>
+      <div class="mermaid">
+graph TB
+    subgraph Platform["Platform Layer (PlatformSuperAdmin)"]
+        SA[super@admin.com\nPlatformSuperAdmin\nMFA required]
+        AUDIT[audit_log\nEvery cross-tenant read\nlogged immutably]
+        SA -->|elevated + audited queries| AUDIT
+    end
+
+    subgraph TenantA["Tenant A — TechCorp"]
+        OA[owner@demo.com\nTenantOwner]
+        PA[phone_demo_us_001\nphone_demo_uk_001]
+        WA_A[waba_demo_techcorp]
+        MA[messages\ntenant_id=A]
+    end
+
+    subgraph TenantB["Tenant B — RetailBrand"]
+        OB[owner@retail.com\nTenantOwner]
+        PB[phone_demo_in_001\nphone_demo_br_001]
+        WA_B[waba_demo_retail]
+        MB[messages\ntenant_id=B]
+    end
+
+    SA -.->|read-only, audited| TenantA
+    SA -.->|read-only, audited| TenantB
+    OA -->|scoped to tenant_id=A only| WA_A
+    OA -->|scoped to tenant_id=A only| PA
+    OA -->|scoped to tenant_id=A only| MA
+    OB -->|scoped to tenant_id=B only| WA_B
+    OB -->|scoped to tenant_id=B only| PB
+    OB -->|scoped to tenant_id=B only| MB
+
+    style SA fill:#7c3aed,color:#fff
+    style OA fill:#0d9488,color:#fff
+    style OB fill:#0d9488,color:#fff
+      </div>
+    </div>
+    <div class="callout">
+      <strong>Row-Level Security (RLS) Implementation</strong>
+      Every MongoDB query in every route handler includes <code>{"tenant_id": p.tenant_id}</code> from the <code>Principal</code> object extracted from the JWT. The only exception is <code>platform.py</code> which does <em>explicitly audited elevated queries</em> — not by disabling the filter globally, but by calling <code>_audited()</code> before any cross-tenant read.
+    </div>
+
+    <h3>Role Hierarchy</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Role</th><th>Tenant Scope</th><th>Capabilities</th></tr>
+        <tr><td><span class="badge-purple">PlatformSuperAdmin</span></td><td>All tenants (audited)</td><td>Cross-tenant usage dashboard, per-tenant drill-down &amp; export, audit log review. MFA mandatory.</td></tr>
+        <tr><td><span class="badge-blue">TenantOwner</span></td><td>Own tenant only</td><td>Full WABA management, template CRUD, messaging, inbox, analytics, billing, user management</td></tr>
+        <tr><td><span class="badge-green">TenantAdmin</span></td><td>Own tenant only</td><td>Same as TenantOwner minus billing admin</td></tr>
+        <tr><td><span class="badge-amber">Agent</span></td><td>Own tenant only</td><td>Inbox reply, conversation management</td></tr>
+        <tr><td><span class="badge-gray">Viewer</span></td><td>Own tenant only</td><td>Read-only dashboards</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 5. Security -->
+  <section id="security">
+    <h2 class="section-title"><span class="num">5</span> Security Architecture</h2>
+    <div class="grid-2">
+      <div>
+        <h3>Authentication</h3>
+        <div class="flow-step"><div class="flow-num">1</div><div class="flow-body"><strong>Password login</strong><span>bcrypt (rounds=10) — passwords never stored in plaintext</span></div></div>
+        <div class="flow-step"><div class="flow-num">2</div><div class="flow-body"><strong>Access token</strong><span>JWT HS256 · 15-minute TTL · carries sub, role, tenant_id, mfa_complete</span></div></div>
+        <div class="flow-step"><div class="flow-num">3</div><div class="flow-body"><strong>Refresh token</strong><span>Random 48-byte opaque string · SHA-256 hash stored in MongoDB · 14-day TTL · httpOnly Secure cookie · rotated on every refresh</span></div></div>
+        <div class="flow-step"><div class="flow-num">4</div><div class="flow-body"><strong>MFA (TOTP)</strong><span>pyotp · TOTP secret encrypted at rest with Fernet · required for PlatformSuperAdmin</span></div></div>
+        <div class="flow-step"><div class="flow-num">5</div><div class="flow-body"><strong>WebSocket auth</strong><span>httpOnly <code>access_token</code> cookie automatically sent by browser in WS handshake headers — server reads via FastAPI <code>Cookie()</code> dep</span></div></div>
+      </div>
+      <div>
+        <h3>Credential Storage</h3>
+        <div class="flow-step"><div class="flow-num">1</div><div class="flow-body"><strong>Meta business tokens</strong><span>Fernet (AES-128-CBC + HMAC-SHA256) encrypted before MongoDB insert. Decrypted in-memory only at send time. NEVER returned to frontend.</span></div></div>
+        <div class="flow-step"><div class="flow-num">2</div><div class="flow-body"><strong>Webhook signature</strong><span>HMAC-SHA256 of raw request body (before JSON parse) validated against <code>META_APP_SECRET</code>. Rejects any request with invalid or missing signature.</span></div></div>
+        <div class="flow-step"><div class="flow-num">3</div><div class="flow-body"><strong>Media URLs</strong><span>HMAC-SHA256 signed · 1-hour TTL · path + expiry in signature · never served publicly</span></div></div>
+        <div class="flow-step"><div class="flow-num">4</div><div class="flow-body"><strong>Password reset</strong><span>48-byte random token · SHA-256 hash stored · 30-min TTL · single-use (marked used on consume)</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Data Model -->
+  <section id="datamodel">
+    <h2 class="section-title"><span class="num">6</span> Data Model (Entity Relationships)</h2>
+    <div class="diagram-wrap">
+      <div class="diagram-label">Core Entity Relationships</div>
+      <div class="mermaid">
+erDiagram
+    tenants {
+        string id PK
+        string name
+        string created_at
+    }
+    users {
+        string id PK
+        string tenant_id FK
+        string email
+        string password_hash
+        string role
+        bool mfa_enabled
+        string mfa_secret_encrypted
+    }
+    wabas {
+        string id PK
+        string tenant_id FK
+        string waba_id
+        string name
+        string business_id
+        bool is_demo
+    }
+    waba_credentials {
+        string id PK
+        string waba_id FK
+        string encrypted_business_token
+    }
+    phone_numbers {
+        string id PK
+        string tenant_id FK
+        string waba_id FK
+        string phone_number_id
+        string display_phone_number
+        string quality_rating
+    }
+    templates {
+        string id PK
+        string tenant_id FK
+        string waba_id FK
+        string name
+        string language
+        string category
+        string status
+        string body
+        array components_json
+        string meta_template_id
+        string rejection_reason
+    }
+    messages {
+        string id PK
+        string tenant_id FK
+        string phone_number_id FK
+        string conversation_id FK
+        string direction
+        string msg_type
+        string status
+        string meta_message_id
+        string template_name
+        string pricing_category
+        bool pricing_billable
+        float cost_amount
+        string country_code
+        string month
+    }
+    conversations {
+        string id PK
+        string tenant_id FK
+        string phone_number_id FK
+        string contact_wa_id
+        string status
+        string assigned_to
+        int unread_count
+        string last_inbound_at
+        string free_entry_point_expires_at
+    }
+    usage_daily_rollup {
+        string id PK
+        string tenant_id FK
+        string day
+        string category
+        string country_code
+        int delivered_count
+        int billable_count
+        int free_count
+        float cost_amount
+    }
+    media_assets {
+        string id PK
+        string tenant_id FK
+        string message_id FK
+        string meta_media_id
+        string mime_type
+        string storage_path
+        int size
+    }
+
+    tenants ||--o{ users : "has"
+    tenants ||--o{ wabas : "owns"
+    wabas ||--|| waba_credentials : "has"
+    wabas ||--o{ phone_numbers : "has"
+    wabas ||--o{ templates : "has"
+    phone_numbers ||--o{ messages : "sends/receives"
+    phone_numbers ||--o{ conversations : "threads"
+    conversations ||--o{ messages : "contains"
+    messages ||--o| media_assets : "may have"
+    tenants ||--o{ usage_daily_rollup : "tracks"
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Collections -->
+  <section id="collections">
+    <h2 class="section-title"><span class="num">7</span> MongoDB Collections</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Collection</th><th>Current Docs</th><th>Purpose</th><th>Key Indexes</th></tr>
+        <tr><td><code>users</code></td><td>3</td><td>Platform users across all tenants</td><td>unique(email), by_tenant</td></tr>
+        <tr><td><code>tenants</code></td><td>2</td><td>Tenant (customer company) records</td><td>by_name</td></tr>
+        <tr><td><code>refresh_tokens</code></td><td>35</td><td>Opaque refresh token hashes, TTL revocation</td><td>unique(token_hash), TTL(expires_at), by_user</td></tr>
+        <tr><td><code>password_resets</code></td><td>0</td><td>Single-use password reset tokens</td><td>unique(token_hash), TTL(expires_at)</td></tr>
+        <tr><td><code>wabas</code></td><td>3</td><td>WhatsApp Business Accounts per tenant</td><td>unique(waba_id), by_tenant</td></tr>
+        <tr><td><code>waba_credentials</code></td><td>3</td><td>Fernet-encrypted Meta business tokens</td><td>unique(waba_id)</td></tr>
+        <tr><td><code>phone_numbers</code></td><td>5</td><td>Phone numbers per WABA</td><td>unique(phone_number_id), by_tenant</td></tr>
+        <tr><td><code>templates</code></td><td>16</td><td>Message templates (local + synced from Meta)</td><td>unique(tenant+waba+name+lang), by_meta_id</td></tr>
+        <tr><td><code>messages</code></td><td>576</td><td>All outbound + inbound messages</td><td>by_tenant_time, by_conv_time, by_meta_id, by_tenant_month_time</td></tr>
+        <tr><td><code>conversations</code></td><td>15</td><td>Conversation threads (contact × phone)</td><td>by_tenant, by_phone_contact</td></tr>
+        <tr><td><code>webhook_events_raw</code></td><td>6</td><td>Raw webhook payloads before processing</td><td>by_time</td></tr>
+        <tr><td><code>mq_jobs</code></td><td>6</td><td>MongoDB-backed async job queue</td><td>by_status (compound with claimed_at)</td></tr>
+        <tr><td><code>usage_daily_rollup</code></td><td>266</td><td>Materialised cost rollup by day/category/country</td><td>by_tenant_day, by_day_global</td></tr>
+        <tr><td><code>template_perf_rollup</code></td><td>36</td><td>Template performance stats by month</td><td>by_tenant_month, by_tpl_month</td></tr>
+        <tr><td><code>media_assets</code></td><td>0</td><td>Media file metadata (downloaded from Meta)</td><td>unique(tenant+meta_media_id), by_message</td></tr>
+        <tr><td><code>audit_log</code></td><td>7</td><td>Immutable action audit trail</td><td>by_tenant_time</td></tr>
+        <tr><td><code>idempotency_keys</code></td><td>0</td><td>Deduplicate outbound message sends</td><td>unique(tenant+key), TTL 24h</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 8. Webhook Flow -->
+  <section id="webhook">
+    <h2 class="section-title"><span class="num">8</span> Webhook Processing Flow</h2>
+    <div class="callout">
+      <strong>Critical correctness rule:</strong> The webhook endpoint MUST ACK in under 1 second. All heavy processing (projection, cost capture, media download, WebSocket broadcast) happens asynchronously in the background worker — never in the request handler.
+    </div>
+    <div class="diagram-wrap">
+      <div class="diagram-label">Meta Webhook → ACK → Worker → Broadcast</div>
+      <div class="mermaid">
+sequenceDiagram
+    participant Meta as Meta Cloud API
+    participant WH as POST /api/webhooks/meta
+    participant DB as MongoDB
+    participant Q as mq_jobs queue
+    participant W as Background Worker
+    participant WS as WebSocket Manager
+
+    Meta->>WH: POST (HMAC-SHA256 signed)
+    WH->>WH: verify_signature(raw_body, X-Hub-Signature-256)
+    alt Invalid signature
+        WH-->>Meta: 401 Unauthorized
+    else Valid
+        WH->>DB: insert webhook_events_raw {payload, signature_ok, status:"received"}
+        WH->>Q: enqueue("process_webhook", {event_id})
+        WH-->>Meta: 200 OK {received:true} ← within 1 second
+    end
+
+    Note over W: Worker polls every 500ms
+    W->>Q: claim_one() — atomic find_one_and_update
+    Q-->>W: job doc {event_id}
+    W->>DB: find webhook_events_raw by event_id
+    DB-->>W: raw payload
+
+    loop For each entry.changes[]
+        alt field == "messages"
+            W->>W: parse statuses[] + messages[]
+            W->>DB: update_one messages {status, timestamps, pricing}
+            W->>DB: upsert conversations {last_inbound_at, unread_count}
+            W->>DB: insert_one messages (inbound)
+            W->>DB: upsert usage_daily_rollup (cost capture)
+            W->>WS: broadcast(tenant_id, {type:"new_message"|"status_update"})
+        else field == "message_template_status_update"
+            W->>DB: update_many templates {status, rejection_reason}
+            W->>WS: broadcast(tenant_id, {type:"template_update"})
+        end
+    end
+
+    W->>DB: mark webhook_events_raw {status:"processed"}
+    W->>Q: complete(job_id)
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. Inbound Message -->
+  <section id="inbound">
+    <h2 class="section-title"><span class="num">9</span> Inbound Message Flow</h2>
+    <div class="diagram-wrap">
+      <div class="diagram-label">Real Customer → Platform Inbox</div>
+      <div class="mermaid">
+sequenceDiagram
+    participant C as Customer (WhatsApp)
+    participant Meta as Meta Cloud API
+    participant WH as Webhook Endpoint
+    participant W as Worker
+    participant DB as MongoDB
+    participant WS as WebSocket
+    participant Agent as Agent Browser
+
+    C->>Meta: Sends WhatsApp message
+    Meta->>WH: POST webhook (type: "messages")
+    WH->>DB: store raw + enqueue
+    WH-->>Meta: 200 ACK
+
+    W->>DB: process event
+    W->>W: extract_message_content(msg)\n→ text/image/video/audio/document\n→ location/contacts/interactive/reaction
+    W->>W: detect free_entry_point\n(referral.source_type == "ad" → 72h window)
+    W->>DB: upsert conversations\n{last_inbound_at, unread_count+1}
+    W->>DB: insert messages\n{direction:inbound, msg_type, body, media_id, month}
+
+    alt Has media (image/video/audio/document)
+        W->>Meta: GET /{media_id} → download URL
+        Meta-->>W: CDN URL
+        W->>Meta: GET CDN URL (Bearer token)
+        Meta-->>W: binary content
+        W->>W: asyncio.to_thread(file.write_bytes)
+        W->>DB: update messages {media_url, media_local_path}
+        W->>DB: upsert media_assets {meta_media_id, storage_path, mime_type}
+    end
+
+    W->>WS: broadcast(tenant_id, {type:"new_message", message})
+    WS->>Agent: push {type:"new_message", conversation_id, message}
+    Agent->>Agent: append to thread,\nincrement unread badge
+
+    Note over Agent: Service window opens/extends 24h\nfrom last_inbound_at
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. Outbound Template -->
+  <section id="outbound">
+    <h2 class="section-title"><span class="num">10</span> Outbound Template Send Flow</h2>
+    <div class="diagram-wrap">
+      <div class="diagram-label">Agent sends approved template → Customer WhatsApp</div>
+      <div class="mermaid">
+sequenceDiagram
+    participant Agent as Agent Browser
+    participant API as POST /api/messages/send
+    participant DB as MongoDB
+    participant MC as MetaClient (httpx)
+    participant Meta as Meta Graph API
+    participant C as Customer (WhatsApp)
+
+    Agent->>API: {phone_number_id, to_wa_id, template_name, language, components}
+    API->>API: verify phone belongs to tenant (RLS)
+    API->>DB: check idempotency_key (DuplicateKeyError → return cached)
+    API->>DB: check rate_limit (60/min per phone)
+    API->>DB: insert message {status:"queued"}
+    API->>DB: fetch waba_credentials → decrypt Fernet token
+    API->>MC: send_template(phone_id, token, to, name, lang, components)
+    MC->>Meta: POST /{phone_number_id}/messages\n{type:"template", name, language, components}
+    Meta-->>MC: {messages:[{id:"wamid..."}]}
+    MC-->>API: result
+    API->>DB: update message {status:"sent", meta_message_id}
+    API->>DB: insert audit_log {action:"message.send"}
+    API-->>Agent: MessagePublic {id, status:"sent", meta_message_id}
+
+    Note over Meta,C: Meta delivers to WhatsApp
+    Meta->>WH: webhook status {sent → delivered → read}
+    Note over WH: Processed by worker\n→ status updates on message
+      </div>
+    </div>
+  </section>
+
+  <!-- 11. Cost & Billing -->
+  <section id="cost">
+    <h2 class="section-title"><span class="num">11</span> Cost Capture & Billing Flow</h2>
+    <div class="diagram-wrap">
+      <div class="diagram-label">Per-Message Cost Logic (Meta CBP Model)</div>
+      <div class="mermaid">
+flowchart TD
+    START([Delivery status webhook received]) --> PARSE[Parse pricing field\ncategory · billable · conversation.origin]
+    PARSE --> WINDOW{Is recipient in\n72h free-entry-point window?}
+    WINDOW -->|YES| FREE[Cost = FREE\nbillable = false]
+    WINDOW -->|NO| WEBHOOK{Does webhook\nprovide billable=true/false?}
+    WEBHOOK -->|YES, trust webhook| APPLY[Apply webhook billable flag]
+    WEBHOOK -->|NO, calculate| CATEGORY{Category?}
+    CATEGORY -->|MARKETING| BILL_M[Always Billable\n~$0.025/msg]
+    CATEGORY -->|AUTHENTICATION| BILL_A[Always Billable\n~$0.015/msg]
+    CATEGORY -->|UTILITY| SW{Is 24h service window\nopen? last_inbound_at < 24h ago}
+    CATEGORY -->|SERVICE / free-form| SW
+    SW -->|YES, in window| FREE
+    SW -->|NO, out of window| BILL_U[Billable\n~$0.015/msg]
+
+    BILL_M --> ROLLUP
+    BILL_A --> ROLLUP
+    BILL_U --> ROLLUP
+    FREE --> ROLLUP
+    APPLY --> ROLLUP
+
+    ROLLUP[upsert usage_daily_rollup\ntenant_id · day · category · country_code\ndelivered++ · billable++ or free++\ncost_amount += est_cost]
+    ROLLUP --> MSG_UPDATE[update message\npricing_category · pricing_billable\ncost_amount · country_code]
+    MSG_UPDATE --> DONE([Done])
+
+    style FREE fill:#dcfce7,color:#15803d
+    style BILL_M fill:#fee2e2,color:#b91c1c
+    style BILL_A fill:#fee2e2,color:#b91c1c
+    style BILL_U fill:#fef9c3,color:#92400e
+      </div>
+    </div>
+
+    <h3>Meta Conversation-Based Pricing (CBP) Categories</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Category</th><th>Triggered By</th><th>Billability</th><th>Approx Cost</th></tr>
+        <tr><td><span class="badge-red">Marketing</span></td><td>Promotional template sends</td><td>Always billable</td><td>~$0.025 USD</td></tr>
+        <tr><td><span class="badge-blue">Utility</span></td><td>Transactional templates (orders, alerts)</td><td>Free if inside 24h service window, billable outside</td><td>~$0.015 USD (if billable)</td></tr>
+        <tr><td><span class="badge-purple">Authentication</span></td><td>OTP / login codes</td><td>Always billable</td><td>~$0.015 USD</td></tr>
+        <tr><td><span class="badge-green">Service</span></td><td>Free-form replies inside 24h window</td><td>Free</td><td>$0.00</td></tr>
+        <tr><td><span class="badge-amber">Free Entry Point</span></td><td>Click-to-WhatsApp / Ad referrals</td><td>Free for 72 hours</td><td>$0.00</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 12. Auth Flow -->
+  <section id="auth">
+    <h2 class="section-title"><span class="num">12</span> Authentication Flow</h2>
+    <div class="diagram-wrap">
+      <div class="diagram-label">Login → JWT → Silent Refresh → Logout</div>
+      <div class="mermaid">
+sequenceDiagram
+    participant B as Browser
+    participant API as FastAPI
+    participant DB as MongoDB
+
+    B->>API: POST /api/auth/login {email, password}
+    API->>DB: find user by email
+    API->>API: bcrypt.checkpw(password, hash)
+    alt MFA enabled
+        API-->>B: 200 {mfa_required:true} + short-lived access_token(mfa_complete=false)
+        B->>API: POST /api/auth/mfa/verify {code}
+        API->>API: pyotp.TOTP.verify(code, secret)
+    end
+    API->>DB: insert refresh_token {hash(raw), user_id, expires_at}
+    API-->>B: 200 {user} + Set-Cookie: access_token (15m, httpOnly) + refresh_token (14d, httpOnly)
+
+    Note over B,API: Silent token refresh
+    B->>API: GET /api/auth/me
+    API->>API: decode JWT → Principal
+    alt JWT expired → Axios interceptor
+        B->>API: POST /api/auth/refresh
+        API->>DB: find_one_and_update {token_hash, revoked:false} → mark revoked
+        API->>DB: insert new refresh_token
+        API-->>B: 200 {user} + new Set-Cookie pair
+        B->>API: retry original request
+    end
+
+    Note over B,API: Logout
+    B->>API: POST /api/auth/logout
+    API->>DB: mark refresh_token revoked
+    API-->>B: 200 + Set-Cookie: expires=epoch (clear)
+      </div>
+    </div>
+  </section>
+
+  <!-- 13. API Reference -->
+  <section id="api">
+    <h2 class="section-title"><span class="num">13</span> API Endpoint Reference</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Description</th></tr>
+        <tr><td colspan="4" style="background:#f8fafc;font-weight:600;font-size:0.8rem;color:#64748b">Auth</td></tr>
+        <tr><td><span class="badge-blue">POST</span></td><td><code>/api/auth/register</code></td><td>—</td><td>Register + create tenant</td></tr>
+        <tr><td><span class="badge-blue">POST</span></td><td><code>/api/auth/login</code></td><td>—</td><td>Login → JWT cookies</td></tr>
+        <tr><td><span class="badge-green">GET</span></td><td><code>/api/auth/me</code></td><td>Cookie</td><td>Current user profile</td></tr>
+        <tr><td><span class="badge-blue">POST</span></td><td><code>/api/auth/refresh</code></td><td>Cookie</td><td>Rotate refresh token</td></tr>
+        <tr><td><span class="badge-blue">POST</span></td><td><code>/api/auth/logout</code></td><td>Cookie</td><td>Revoke + clear cookies</td></tr>
+        <tr><td><span class="badge-blue">POST</span></td><td><code>/api/auth/mfa/setup</code></td><td>JWT</td><td>Generate TOTP secret + QR</td></tr>
+        <tr><td><span class="badge-blue">POST</span></td><td><code>/api/auth/mfa/verify</code></td><td>JWT</td><td>Verify TOTP code (setup or login)</td></tr>
+        <tr><td colspan="4" style="background:#f8fafc;font-weight:600;font-size:0.8rem;color:#64748b">Onboarding</td></tr>
+        <tr><td><span class="badge-blue">POST</span></td><td><code>/api/onboarding/exchange</code></td><td>JWT+Tenant</td><td>Exchange Embedded Signup auth code → WABA + phone</td></tr>
+        <tr><td colspan="4" style="background:#f8fafc;font-weight:600;font-size:0.8rem;color:#64748b">Templates</td></tr>
+        <tr><td><span class="badge-green">GET</span></td><td><code>/api/templates</code></td><td>JWT+Tenant</td><td>List templates (filter: waba_id, status, category, language, search)</td></tr>
+        <tr><td><span class="badge-green">GET</span></td><td><code>/api/templates/{id}</code></td><td>JWT+Tenant</td><td>Full template detail with components</td></tr>
+        <tr><td><span class="badge-blue">POST</span></td><td><code>/api/templates</code></td><td>JWT+Tenant</td><td>Create + submit to Meta Graph API</td></tr>
+        <tr><td><span class="badge-red">DELETE</span></td><td><code>/api/templates/{id}</code></td><td>JWT+Tenant</td><td>Delete from Meta + DB</td></tr>
+        <tr><td><span class="badge-blue">POST</span></td><td><code>/api/templates/sync</code></td><td>JWT+Tenant</td><td>Sync templates from Meta for a WABA</td></tr>
+        <tr><td colspan="4" style="background:#f8fafc;font-weight:600;font-size:0.8rem;color:#64748b">Messaging</td></tr>
+        <tr><td><span class="badge-blue">POST</span></td><td><code>/api/messages/send</code></td><td>JWT+Tenant</td><td>Send approved template (rate limited, idempotent)</td></tr>
+        <tr><td><span class="badge-green">GET</span></td><td><code>/api/messages</code></td><td>JWT+Tenant</td><td>List messages (paginated, filterable by status)</td></tr>
+        <tr><td><span class="badge-blue">POST</span></td><td><code>/api/messages/{id}/simulate-webhook</code></td><td>JWT+Tenant</td><td>Demo: simulate delivery/read/failed status update</td></tr>
+        <tr><td colspan="4" style="background:#f8fafc;font-weight:600;font-size:0.8rem;color:#64748b">Inbox</td></tr>
+        <tr><td><span class="badge-green">GET</span></td><td><code>/api/inbox/conversations</code></td><td>JWT+Tenant</td><td>List conversations (filter: status, phone)</td></tr>
+        <tr><td><span class="badge-green">GET</span></td><td><code>/api/inbox/conversations/{id}/messages</code></td><td>JWT+Tenant</td><td>Thread + reset unread count</td></tr>
+        <tr><td><span class="badge-blue">POST</span></td><td><code>/api/inbox/conversations/{id}/reply</code></td><td>JWT+Tenant</td><td>Free-form reply (window enforced server-side)</td></tr>
+        <tr><td><span class="badge-blue">POST</span></td><td><code>/api/inbox/conversations/{id}/assign</code></td><td>JWT+Tenant</td><td>Assign to agent user</td></tr>
+        <tr><td><span class="badge-blue">POST</span></td><td><code>/api/inbox/conversations/{id}/close</code></td><td>JWT+Tenant</td><td>Close conversation</td></tr>
+        <tr><td><span class="badge-blue">POST</span></td><td><code>/api/inbox/conversations/{id}/reopen</code></td><td>JWT+Tenant</td><td>Reopen conversation</td></tr>
+        <tr><td><span class="badge-green">GET</span></td><td><code>/api/inbox/media/{tenant}/{filename}</code></td><td>HMAC token</td><td>Serve stored media (signed URL, 1h TTL)</td></tr>
+        <tr><td colspan="4" style="background:#f8fafc;font-weight:600;font-size:0.8rem;color:#64748b">Analytics</td></tr>
+        <tr><td><span class="badge-green">GET</span></td><td><code>/api/analytics/overview</code></td><td>JWT+Tenant</td><td>Message stats (total, delivery rate, read rate) with date range</td></tr>
+        <tr><td><span class="badge-green">GET</span></td><td><code>/api/analytics/timeseries</code></td><td>JWT+Tenant</td><td>Daily message counts for charts</td></tr>
+        <tr><td><span class="badge-green">GET</span></td><td><code>/api/analytics/dashboard</code></td><td>JWT+Tenant</td><td>Delivery/read/failure rates, cost burn, top failure reasons, throughput</td></tr>
+        <tr><td><span class="badge-green">GET</span></td><td><code>/api/analytics/by-template</code></td><td>JWT+Tenant</td><td>Template performance (sent/delivered/read/failed)</td></tr>
+        <tr><td><span class="badge-green">GET</span></td><td><code>/api/analytics/usage/daily</code></td><td>JWT+Tenant</td><td>Daily usage rollup rows</td></tr>
+        <tr><td><span class="badge-green">GET</span></td><td><code>/api/analytics/usage/cost</code></td><td>JWT+Tenant</td><td>Cost summary (MTD, by_category, by_country, trend)</td></tr>
+        <tr><td><span class="badge-green">GET</span></td><td><code>/api/analytics/export</code></td><td>JWT+Tenant</td><td>Download CSV or XLSX usage report</td></tr>
+        <tr><td colspan="4" style="background:#f8fafc;font-weight:600;font-size:0.8rem;color:#64748b">Platform (PlatformSuperAdmin only)</td></tr>
+        <tr><td><span class="badge-green">GET</span></td><td><code>/api/platform/overview</code></td><td>JWT+SA</td><td>Cross-tenant stats (audited)</td></tr>
+        <tr><td><span class="badge-green">GET</span></td><td><code>/api/platform/tenants</code></td><td>JWT+SA</td><td>All tenants + usage summary (audited)</td></tr>
+        <tr><td><span class="badge-green">GET</span></td><td><code>/api/platform/tenants/{id}/usage</code></td><td>JWT+SA</td><td>Per-tenant drill-down (audited)</td></tr>
+        <tr><td><span class="badge-green">GET</span></td><td><code>/api/platform/tenants/{id}/export</code></td><td>JWT+SA</td><td>Per-tenant CSV/XLSX export (audited)</td></tr>
+        <tr><td colspan="4" style="background:#f8fafc;font-weight:600;font-size:0.8rem;color:#64748b">Webhooks</td></tr>
+        <tr><td><span class="badge-green">GET</span></td><td><code>/api/webhooks/meta</code></td><td>hub.verify_token</td><td>Meta GET verification challenge</td></tr>
+        <tr><td><span class="badge-blue">POST</span></td><td><code>/api/webhooks/meta</code></td><td>X-Hub-Signature-256</td><td>Meta webhook ingestion (ACK &lt;1s)</td></tr>
+        <tr><td colspan="4" style="background:#f8fafc;font-weight:600;font-size:0.8rem;color:#64748b">System</td></tr>
+        <tr><td><span class="badge-green">GET</span></td><td><code>/api/system/info</code></td><td>—</td><td>Public: mock_mode, app_id, version</td></tr>
+        <tr><td><span class="badge-green">GET</span></td><td><code>/api/health</code></td><td>—</td><td>Health check + Prometheus metrics</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 14. WebSocket -->
+  <section id="websocket">
+    <h2 class="section-title"><span class="num">14</span> WebSocket Protocol</h2>
+    <div class="grid-2">
+      <div>
+        <h3>Connection</h3>
+        <pre><code>URL: wss://&lt;host&gt;/api/ws/inbox
+Auth: httpOnly access_token cookie (auto-sent by browser)
+Fallback: 401 → reconnect after token refresh</code></pre>
+        <h3>Server → Client Events</h3>
+        <pre><code>{"type": "auth_ok", "tenant_id": "..."}
+{"type": "new_message",
+ "conversation_id": "...",
+ "message": {id, direction, body, status, ...}}
+{"type": "status_update",
+ "message_id": "...", "status": "delivered"}
+{"type": "template_update",
+ "template_name": "...", "status": "APPROVED",
+ "reason": null}
+{"type": "ping"}</code></pre>
+      </div>
+      <div>
+        <h3>Connection Manager</h3>
+        <pre><code>class ConnectionManager:
+  # In-process dict: tenant_id → Set[WebSocket]
+  # Single uvicorn process → no pub/sub needed
+  # Dead connections pruned on broadcast
+  async def broadcast(tenant_id, payload): ...</code></pre>
+        <h3>Client → Server</h3>
+        <pre><code>"ping"  → server replies "pong"</code></pre>
+        <h3>Reconnection</h3>
+        <pre><code>// Auto-reconnect on close
+ws.onclose = () => setTimeout(connect, 4000)</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15. Infrastructure -->
+  <section id="infra">
+    <h2 class="section-title"><span class="num">15</span> Infrastructure & Deployment</h2>
+    <div class="diagram-wrap">
+      <div class="diagram-label">Process &amp; Network Topology</div>
+      <div class="mermaid">
+graph LR
+    subgraph K8S["Kubernetes Pod"]
+        SUPER[Supervisor\nProcess Manager]
+        SUPER -->|port 3000| FE[yarn start\nReact 19\nCRA + CRACO]
+        SUPER -->|port 8001| BE[uvicorn\nFastAPI\n--reload]
+        SUPER --> MONGO[mongod\nMongoDB]
+        SUPER --> NGINX[nginx\nReverse Proxy]
+    end
+
+    subgraph Routes["Nginx Routing"]
+        NGINX -->|/api/*\nWebSocket upgrade| BE
+        NGINX -->|/* | FE
+    end
+
+    INTERNET((Internet)) -->|HTTPS :443| NGINX
+    BE <-->|Motor async driver| MONGO
+    BE <-->|httpx| METACLOUD[Meta Graph\nAPI v21.0]
+
+    style K8S fill:#f0f9ff,stroke:#0ea5e9
+    style SUPER fill:#7c3aed,color:#fff
+    style BE fill:#0d9488,color:#fff
+    style FE fill:#0ea5e9,color:#fff
+    style MONGO fill:#15803d,color:#fff
+    style NGINX fill:#f59e0b,color:#fff
+      </div>
+    </div>
+
+    <h3>Environment Variables</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Variable</th><th>Required</th><th>Description</th></tr>
+        <tr><td><code>MONGO_URL</code></td><td><span class="badge-red">Required</span></td><td>MongoDB connection string</td></tr>
+        <tr><td><code>JWT_SIGNING_KEY</code></td><td><span class="badge-red">Required</span></td><td>64-char hex secret for JWT HS256</td></tr>
+        <tr><td><code>TOKEN_ENCRYPTION_KEY</code></td><td><span class="badge-red">Required</span></td><td>Fernet key (32-byte base64) for token encryption</td></tr>
+        <tr><td><code>META_APP_ID</code></td><td><span class="badge-amber">Live mode</span></td><td>Meta App ID (public)</td></tr>
+        <tr><td><code>META_APP_SECRET</code></td><td><span class="badge-amber">Live mode</span></td><td>Meta App Secret (never returned to frontend)</td></tr>
+        <tr><td><code>META_EMBEDDED_SIGNUP_CONFIG_ID</code></td><td><span class="badge-amber">Live mode</span></td><td>Embedded Signup configuration ID</td></tr>
+        <tr><td><code>META_WEBHOOK_VERIFY_TOKEN</code></td><td><span class="badge-amber">Live mode</span></td><td>Custom string for webhook GET challenge</td></tr>
+        <tr><td><code>META_MOCK_MODE</code></td><td><span class="badge-gray">Optional</span></td><td><code>false</code> = live, <code>true</code> = stub all Meta calls</td></tr>
+        <tr><td><code>MEDIA_STORAGE_MODE</code></td><td><span class="badge-gray">Optional</span></td><td><code>disk</code> (default) or <code>s3</code></td></tr>
+        <tr><td><code>REACT_APP_BACKEND_URL</code></td><td><span class="badge-red">Required</span></td><td>Frontend env: absolute URL for API calls</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 16. Phase Roadmap -->
+  <section id="phases">
+    <h2 class="section-title"><span class="num">16</span> Phase Roadmap</h2>
+    <div class="diagram-wrap">
+      <div class="diagram-label">Implementation Phases</div>
+      <div class="mermaid">
+gantt
+    dateFormat  YYYY-MM-DD
+    section Phase 1 ✅
+    Auth (JWT · MFA · refresh)         :done, p1a, 2026-04-01, 7d
+    Meta Embedded Signup               :done, p1b, after p1a, 5d
+    Webhook ingestion + worker         :done, p1c, after p1b, 5d
+    Outbound template send             :done, p1d, after p1c, 3d
+    Marketing pages + auth UI          :done, p1e, after p1d, 5d
+    section Phase 2 ✅
+    Template component builder         :done, p2a, 2026-05-01, 7d
+    Real-time inbox (WebSocket)        :done, p2b, after p2a, 8d
+    All message types + media          :done, p2c, after p2b, 5d
+    Cost capture + daily rollup        :done, p2d, after p2c, 4d
+    section Phase 2.5 ✅
+    Usage & Billing dashboard          :done, p25a, 2026-06-01, 5d
+    Platform super-admin view          :done, p25b, after p25a, 4d
+    CSV / XLSX export                  :done, p25c, after p25b, 2d
+    Demo seed data                     :done, p25d, after p25c, 2d
+    section Phase 3 (Planned)
+    Alerting placeholders              :p3a, 2026-08-01, 5d
+    Tenant management UI               :p3b, after p3a, 7d
+    Stripe billing integration         :p3c, after p3b, 7d
+    Bulk campaign broadcasting         :p3d, after p3c, 10d
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:1.5rem">
+      <div class="card">
+        <div class="card-title">✅ Completed (Phase 1–2.5)</div>
+        <div class="card-sub">
+          Multi-tenant auth · MFA · JWT refresh · Embedded Signup · Webhook ingestion (&lt;1s ACK) · Template CRUD (Meta Graph) · Component builder UI · Real-time inbox (WebSocket) · 10+ message types · Media download/storage · 24h + 72h window enforcement · Cost capture (CBP model) · Daily rollup · Usage &amp; Billing dashboard · CSV/XLSX export · Platform super-admin (audited) · Demo seed data
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🔜 Phase 3 (Planned)</div>
+        <div class="card-sub">
+          Proactive alerting (quality-rating drop, failure spikes) · Tenant management UI (invite users) · Stripe billing integration · Bulk campaign broadcasting · ClickHouse analytics warehouse · Horizontal scaling / read replicas · Secrets in Vault · Multi-Partner Solution flows · AI chatbot / auto-replies
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div style="margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);text-align:center;color:var(--muted);font-size:0.8rem">
+    WhatsApp Business Management Platform · Built on FARM Stack · Phase 1–2.5 Complete · July 2026
+  </div>
+
+</main>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    themeVariables: {
+      primaryColor: '#0d9488',
+      primaryTextColor: '#fff',
+      primaryBorderColor: '#0f766e',
+      lineColor: '#94a3b8',
+      secondaryColor: '#f1f5f9',
+      tertiaryColor: '#ffffff',
+      background: '#ffffff',
+      nodeBorder: '#e2e8f0',
+      fontSize: '13px',
+    },
+    flowchart: { htmlLabels: true, curve: 'basis' },
+    sequence: { mirrorActors: false, messageAlign: 'center' },
+    er: { useMaxWidth: true },
+    gantt: { useMaxWidth: true },
+  });
+</script>
+</body>
+</html>
