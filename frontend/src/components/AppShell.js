@@ -26,7 +26,8 @@ import {
     BarChart3,
     Settings,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 const nav = [
@@ -47,6 +48,11 @@ export default function AppShell({ children }) {
     const navigate = useNavigate();
     const location = useLocation();
     const [open, setOpen] = useState(false);
+    const [mockMode, setMockMode] = useState(null);
+
+    useEffect(() => {
+        api.get("/system/info").then(r => setMockMode(r.data.mock_mode)).catch(() => {});
+    }, []);
 
     const handleLogout = async () => {
         await logout();
@@ -104,10 +110,21 @@ export default function AppShell({ children }) {
                     })}
                 </nav>
                 <div className="absolute bottom-4 left-3 right-3 rounded-lg bg-white/5 p-3 text-xs text-slate-300">
-                    <div className="font-medium text-white">Mock mode</div>
-                    <div className="mt-1 leading-relaxed text-slate-400">
-                        Meta API calls are stubbed. Use simulated webhooks to test the full flow.
-                    </div>
+                    {mockMode === false ? (
+                        <>
+                            <div className="font-medium text-green-400">Live mode</div>
+                            <div className="mt-1 leading-relaxed text-slate-400">
+                                Real Meta API calls enabled. Webhooks are active.
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="font-medium text-white">Mock mode</div>
+                            <div className="mt-1 leading-relaxed text-slate-400">
+                                Meta API calls are stubbed. Use simulated webhooks to test the full flow.
+                            </div>
+                        </>
+                    )}
                 </div>
             </aside>
 
@@ -132,12 +149,18 @@ export default function AppShell({ children }) {
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <span
-                            className="rounded-full border bg-[hsl(38_92%_95%)] px-2.5 py-0.5 text-xs font-medium text-[hsl(38_92%_28%)] inline-flex"
-                            data-testid="admin-mock-badge"
-                        >
-                            MOCK MODE
-                        </span>
+                        {mockMode !== null && (
+                            <span
+                                className={`rounded-full border px-2.5 py-0.5 text-xs font-medium inline-flex ${
+                                    mockMode
+                                        ? "bg-[hsl(38_92%_95%)] text-[hsl(38_92%_28%)]"
+                                        : "bg-[hsl(152_55%_93%)] text-[hsl(152_55%_26%)]"
+                                }`}
+                                data-testid="admin-mock-badge"
+                            >
+                                {mockMode ? "MOCK MODE" : "LIVE MODE"}
+                            </span>
+                        )}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="sm" data-testid="admin-user-menu">
