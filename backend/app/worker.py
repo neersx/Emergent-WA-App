@@ -288,6 +288,9 @@ async def _handle_status_update(
     # On delivery: update cost rollup + broadcast WS update
     if msg_doc and status_name == "delivered":
         tenant_id = msg_doc.get("tenant_id")
+        from .analytics import wa_id_to_country
+        recipient_wa_id = msg_doc.get("to_wa_id") or ""
+        country_code = wa_id_to_country(recipient_wa_id) or None
         conv_doc = await db.conversations.find_one(
             {"id": msg_doc.get("conversation_id")}
         ) if msg_doc.get("conversation_id") else None
@@ -303,7 +306,7 @@ async def _handle_status_update(
 
         if tenant_id:
             await _update_usage_rollup(
-                tenant_id, day, origin_type, None, billable, cost
+                tenant_id, day, origin_type, country_code, billable, cost
             )
             # WS broadcast
             from .ws import ws_manager
@@ -354,6 +357,7 @@ async def _handle_inbound_message(
         },
         {
             "$set": conv_update,
+            "$inc": {"unread_count": 1},
             "$setOnInsert": {
                 "_id": conv_id,
                 "id": conv_id,
@@ -362,20 +366,17 @@ async def _handle_inbound_message(
                 "contact_wa_id": from_wa_id,
                 "status": "open",
                 "assigned_to": None,
-                "unread_count": 0,
                 "created_at": now_iso,
             },
         },
         upsert=True,
         return_document=True,
     )
-    # Increment unread
-    await db.conversations.update_one(
-        {"id": conv_id}, {"$inc": {"unread_count": 1}}
-    )
+    # unread_count increment is already in the update above
 
     # Persist inbound message
     mid = str(uuid.uuid4())
+    now_month = now_iso[:7]  # YYYY-MM for monthly partitioning
     record: dict[str, Any] = {
         "_id": mid,
         "id": mid,
@@ -387,6 +388,7 @@ async def _handle_inbound_message(
         "meta_message_id": meta_message_id,
         "status": "delivered",
         "created_at": now_iso,
+        "month": now_month,
         **content,
     }
     await db.messages.insert_one(record)
@@ -424,6 +426,7 @@ async def _download_message_media(
     api_version: str,
 ) -> None:
     from .crypto_utils import decrypt
+    from .analytics import wa_id_to_country
     db = get_db()
     cred = await db.waba_credentials.find_one({"waba_id": waba_id})
     if not cred:
@@ -436,6 +439,7 @@ async def _download_message_media(
         mime_type=mime_type,
         api_version=api_version,
     )
+    now_iso = datetime.now(timezone.utc).isoformat()
     if local_path:
         app_url = _get_app_url()
         media_url = make_media_url(app_url, tenant_id, media_id, ext) if app_url else None
@@ -443,6 +447,25 @@ async def _download_message_media(
             {"_id": message_id},
             {"$set": {"media_url": media_url, "media_local_path": local_path}},
         )
+    # Track in media_assets collection
+    await db.media_assets.update_one(
+        {"tenant_id": tenant_id, "meta_media_id": media_id},
+        {
+            "$setOnInsert": {
+                "_id": str(uuid.uuid4()),
+                "id": str(uuid.uuid4()),
+                "tenant_id": tenant_id,
+                "message_id": message_id,
+                "meta_media_id": media_id,
+                "mime_type": mime_type,
+                "storage_path": local_path or "",
+                "size": 0,
+                "downloaded_at": now_iso,
+                "created_at": now_iso,
+            }
+        },
+        upsert=True,
+    )
 
 
 # ─── Template status webhook handler ─────────────────────────────────────────
@@ -481,12 +504,13 @@ async def _handle_template_status_change(value: dict) -> None:
 # ─── Periodic template sync ───────────────────────────────────────────────────
 
 async def _schedule_template_sync() -> None:
-    """Enqueue sync jobs for all WABAs that haven't been synced recently."""
+    """Enqueue sync jobs for all real (non-demo) WABAs that haven't been synced recently."""
     from .queue import enqueue
     db = get_db()
     cutoff = (datetime.now(timezone.utc) - timedelta(seconds=TEMPLATE_SYNC_INTERVAL)).isoformat()
     wabas = await db.wabas.find(
         {
+            "is_demo": {"$ne": True},  # Skip seeded demo WABAs
             "$or": [
                 {"templates_last_synced_at": {"$lt": cutoff}},
                 {"templates_last_synced_at": {"$exists": False}},
@@ -506,8 +530,19 @@ async def _sync_templates_for_waba(waba_id: str, tenant_id: str) -> None:
     db = get_db()
     cred = await db.waba_credentials.find_one({"waba_id": waba_id})
     token = decrypt(cred["encrypted_business_token"]) if cred else ""
-    fetched = await meta_client.list_templates(waba_id, token)
     now = datetime.now(timezone.utc).isoformat()
+
+    # Always mark synced_at so we don't retry on every worker tick
+    await db.wabas.update_one(
+        {"waba_id": waba_id}, {"$set": {"templates_last_synced_at": now}}
+    )
+
+    try:
+        fetched = await meta_client.list_templates(waba_id, token)
+    except Exception as exc:
+        logger.warning(f"Template sync skipped for waba={waba_id}: {exc}")
+        return
+
     for t in fetched:
         key = {
             "tenant_id": tenant_id,
@@ -537,9 +572,6 @@ async def _sync_templates_for_waba(waba_id: str, tenant_id: str) -> None:
             },
             upsert=True,
         )
-    await db.wabas.update_one(
-        {"waba_id": waba_id}, {"$set": {"templates_last_synced_at": now}}
-    )
     logger.info(f"Periodic sync: {len(fetched)} templates waba={waba_id}")
 
 

@@ -36,6 +36,7 @@ from app.templates import router as templates_router
 from app.webhooks import router as webhook_router
 from app.worker import start_worker, stop_worker
 from app.ws import router as ws_router
+from app.platform import router as platform_router
 
 
 # ----- Logging -----
@@ -112,6 +113,7 @@ app.include_router(admin_router)
 app.include_router(webhook_router)
 app.include_router(health_router)
 app.include_router(ws_router)
+app.include_router(platform_router)
 
 
 @app.get("/api/")

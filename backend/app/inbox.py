@@ -429,7 +429,6 @@ async def _insert_simulated_inbound(
                 "contact_wa_id": contact_wa_id,
                 "status": "open",
                 "assigned_to": None,
-                "unread_count": 0,
                 "created_at": now,
             },
         },

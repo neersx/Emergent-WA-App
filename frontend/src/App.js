@@ -22,8 +22,10 @@ import SendPage from "@/pages/admin/SendPage";
 import MessagesPage from "@/pages/admin/MessagesPage";
 import InboxPage from "@/pages/admin/InboxPage";
 import AnalyticsPage from "@/pages/admin/AnalyticsPage";
+import UsagePage from "@/pages/admin/UsagePage";
 import SecurityPage from "@/pages/admin/SecurityPage";
 import SettingsPage from "@/pages/admin/SettingsPage";
+import PlatformPage from "@/pages/admin/PlatformPage";
 
 function App() {
     return (
@@ -54,8 +56,10 @@ function App() {
                             <Route path="/app/messages" element={<MessagesPage />} />
                             <Route path="/app/inbox" element={<InboxPage />} />
                             <Route path="/app/analytics" element={<AnalyticsPage />} />
+                            <Route path="/app/usage" element={<UsagePage />} />
                             <Route path="/app/security" element={<SecurityPage />} />
                             <Route path="/app/settings" element={<SettingsPage />} />
+                            <Route path="/app/platform" element={<PlatformPage />} />
                         </Route>
 
                         {/* Fallback */}

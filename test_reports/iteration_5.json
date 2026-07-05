@@ -1,0 +1,58 @@
+{
+  "summary": "Phase 2+2.5 full testing: Login, Inbox, Analytics, Usage & Billing, Templates, and all API endpoints. All core features working correctly.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "WebSocket real-time",
+        "issue": "WebSocket connection to /api/ws/inbox fails in preview environment - non-blocking, UI still works via polling/REST",
+        "affected_selectors": []
+      }
+    ],
+    "design_issues": [
+      {
+        "screen": "Templates page",
+        "issues": ["Shows 'No templates' empty state (not 'Connect a WABA first') because demo WABA seed IS shown in WABA dropdown - this is the correct/expected behavior per spec notes"]
+      }
+    ]
+  },
+  "passed_tests": [
+    "Login with owner@demo.com / Owner123! - dashboard loads",
+    "Inbox loads with 1 conversation (+15559998888) and '24 hours left' badge",
+    "Inbox 'Simulate new' button creates new conversation with toast 'New conversation created'",
+    "Inbox thread view shows messages with correct bubble layout (code: inbound=justify-start, outbound=justify-end)",
+    "Inbox service window badge shows '24 hours left'",
+    "Inbox reply composer ENABLED when service window is open",
+    "Inbox close/reopen conversation works ('Conversation closed' toast, 'Reopen' button, composer disabled with 'Service window closed')",
+    "Usage & Billing page loads with MTD spend, Last 30 days, Billable deliveries, Free deliveries stat cards",
+    "Usage & Billing CSV export button present and clickable",
+    "Usage & Billing Excel (xlsx) export button present and clickable",
+    "Analytics Messages tab loads with stat cards (Total messages=4, Delivered=4, Failed=0, Conversations=1) and timeseries chart",
+    "Analytics Usage & Cost tab shows 'No cost data yet. Data appears when messages are delivered.'",
+    "Templates page loads with Demo Business Account (Seed) in WABA dropdown",
+    "New Template button is ENABLED (not disabled) since demo WABA exists",
+    "New Template dialog opens with full component builder (name, language, category, header/body/footer/buttons, live preview)",
+    "API: POST /api/inbox/simulate-inbound returns {conversation_id, ...} - 200 OK",
+    "API: GET /api/inbox/conversations returns array with >= 1 conversation",
+    "API: GET /api/analytics/usage/cost returns {mtd_cost_usd, by_category, by_country}",
+    "API: GET /api/analytics/usage/daily returns array",
+    "API: GET /api/analytics/dashboard returns delivery_rate, read_rate, failure_rate, cost_burn_rate, throughput",
+    "API: GET /api/platform/overview returns 403 for owner@demo.com (TenantOwner not PlatformSuperAdmin)"
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_phase2_5.py",
+    "/app/test_reports/pytest/pytest_phase2_5.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": ["/app/backend/tests/test_phase2_5.py"],
+  "success_rate": {"backend": "100% (8/8 tests pass)", "frontend": "100% (all features working)"},
+  "seed_data_creation": "Backend test created simulate-inbound conversations via API during testing",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Phase 2+2.5 fully verified. Demo WABA seed (demo_waba_seed_001) + phone (demo_phone_seed_001) working. simulate-inbound creates conversations correctly. Inbox close/reopen, service window badge all working. Analytics dashboard/usage APIs return correct shapes. Platform overview correctly returns 403 for non-super-admin. WebSocket fails in preview env but non-blocking. Templates shows 'No templates' (not 'Connect WABA') because demo WABA is seeded - this is expected."
+}

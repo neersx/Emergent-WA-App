@@ -2,29 +2,13 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+    DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+    DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-    LayoutDashboard,
-    Plug,
-    Smartphone,
-    Send,
-    MessageSquareText,
-    ShieldCheck,
-    LogOut,
-    User,
-    MessageCircle,
-    Menu,
-    X,
-    FileText,
-    Inbox,
-    BarChart3,
-    Settings,
+    LayoutDashboard, Plug, Smartphone, Send, MessageSquareText,
+    ShieldCheck, LogOut, User, MessageCircle, Menu, X, FileText,
+    Inbox, BarChart3, Settings, Receipt, Server,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
@@ -39,8 +23,13 @@ const nav = [
     { to: "/app/messages", label: "Message Log", icon: MessageSquareText },
     { to: "/app/inbox", label: "Inbox", icon: Inbox },
     { to: "/app/analytics", label: "Analytics", icon: BarChart3 },
+    { to: "/app/usage", label: "Usage & Billing", icon: Receipt },
     { to: "/app/security", label: "Security", icon: ShieldCheck },
     { to: "/app/settings", label: "Settings", icon: Settings },
+];
+
+const platformNav = [
+    { to: "/app/platform", label: "Platform Admin", icon: Server },
 ];
 
 export default function AppShell({ children }) {
@@ -108,6 +97,31 @@ export default function AppShell({ children }) {
                             </Link>
                         );
                     })}
+                    {user?.role === "PlatformSuperAdmin" && (
+                        <>
+                            <div className="my-2 border-t border-white/10" />
+                            {platformNav.map((item) => {
+                                const active = location.pathname.startsWith(item.to);
+                                const Icon = item.icon;
+                                return (
+                                    <Link
+                                        key={item.to}
+                                        to={item.to}
+                                        onClick={() => setOpen(false)}
+                                        data-testid={`admin-nav-${item.to.split("/").pop()}`}
+                                        className={cn(
+                                            "group mb-1 flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                                            "text-slate-300 hover:bg-white/10",
+                                            active && "bg-white/15 text-white",
+                                        )}
+                                    >
+                                        <Icon className="h-4 w-4 opacity-90" />
+                                        <span>{item.label}</span>
+                                    </Link>
+                                );
+                            })}
+                        </>
+                    )}
                 </nav>
                 <div className="absolute bottom-4 left-3 right-3 rounded-lg bg-white/5 p-3 text-xs text-slate-300">
                     {mockMode === false ? (

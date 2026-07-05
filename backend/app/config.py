@@ -38,5 +38,16 @@ class Settings:
     # Rate limit (per phone number per minute)
     SEND_RATE_LIMIT_PER_MIN: int = 60
 
+    # Media storage
+    MEDIA_STORAGE_MODE: str = os.environ.get("MEDIA_STORAGE_MODE", "disk")  # disk | s3
+    MEDIA_STORAGE_PATH: str = os.environ.get("MEDIA_STORAGE_PATH", "/app/media")
+    MEDIA_S3_ENDPOINT: str = os.environ.get("MEDIA_S3_ENDPOINT", "")
+    MEDIA_S3_BUCKET: str = os.environ.get("MEDIA_S3_BUCKET", "")
+    MEDIA_S3_ACCESS_KEY: str = os.environ.get("MEDIA_S3_ACCESS_KEY", "")
+    MEDIA_S3_SECRET_KEY: str = os.environ.get("MEDIA_S3_SECRET_KEY", "")
+
+    # Real-time
+    SIGNALR_ENABLED: bool = os.environ.get("SIGNALR_ENABLED", "true").lower() == "true"
+
 
 settings = Settings()
